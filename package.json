@@ -1,0 +1,72 @@
+{
+  "name": "tare-pdf-generator",
+  "version": "1.0.0",
+  "description": "渲染图演示 PDF 生成器 - 专为设计师打造的图片批量处理和PDF生成工具",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "dist": "electron-builder --publish=never"
+  },
+  "keywords": [
+    "electron",
+    "pdf",
+    "image",
+    "generator",
+    "design"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "electron-packager": "^17.1.2"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "pdf-lib": "^1.17.1",
+    "sharp": "^0.33.1"
+  },
+  "build": {
+    "appId": "com.tarepdf.generator",
+    "productName": "Tare PDF Generator",
+    "forceCodeSigning": false,
+    "afterSign": false,
+    "afterAllArtifactBuild": false,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "fonts/**/*",
+      "assets/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "fonts",
+        "to": "fonts"
+      }
+    ],
+    "win": {
+      "target": {
+        "target": "portable",
+        "arch": [
+          "x64"
+        ]
+      },
+      "publisherName": "Tare PDF Generator",
+      "requestedExecutionLevel": "asInvoker",
+      "sign": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Tare PDF Generator"
+    }
+  }
+}

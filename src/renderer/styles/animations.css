@@ -1,0 +1,413 @@
+/* 页面切换动画 */
+.tab-content {
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+}
+
+.tab-content.active {
+  animation-name: fadeInUp;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 图片卡片进入动画 */
+.image-card {
+  animation: fadeInScale 0.4s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 图片卡片删除动画 */
+.image-card.removing {
+  animation: fadeOutScale 0.3s ease-in forwards;
+}
+
+@keyframes fadeOutScale {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* 拖拽动画 */
+.image-card.drag-start {
+  animation: dragStart 0.2s ease-out;
+}
+
+@keyframes dragStart {
+  from {
+    transform: scale(1) rotate(0deg);
+  }
+  to {
+    transform: scale(0.95) rotate(5deg);
+  }
+}
+
+.image-card.drag-end {
+  animation: dragEnd 0.3s ease-out;
+}
+
+@keyframes dragEnd {
+  from {
+    transform: scale(0.95) rotate(5deg);
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* 选择动画 */
+.image-card.selecting {
+  animation: selectPulse 0.3s ease-out;
+}
+
+@keyframes selectPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 按钮点击动画 */
+.btn.clicked {
+  animation: buttonClick 0.2s ease-out;
+}
+
+@keyframes buttonClick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Toast 进入动画 */
+.toast.entering {
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Toast 退出动画 */
+.toast.exiting {
+  animation: toastSlideOut 0.3s ease-in;
+}
+
+@keyframes toastSlideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* 加载动画 */
+.loading-overlay.entering {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.loading-spinner {
+  animation: bounceIn 0.4s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 设置卡片悬浮动画 */
+.setting-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.setting-card:hover {
+  animation: cardHover 0.3s ease-out;
+}
+
+@keyframes cardHover {
+  0% {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+  100% {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* 导航项切换动画 */
+
+
+/* 表单输入焦点动画 */
+.form-input,
+.form-textarea,
+.form-select {
+  position: relative;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  animation: inputFocus 0.3s ease-out;
+}
+
+@keyframes inputFocus {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+}
+
+/* 进度条动画 */
+.progress-fill {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background-image: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 20px 20px;
+  animation: progressStripes 1s linear infinite;
+}
+
+@keyframes progressStripes {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 0;
+  }
+}
+
+/* 拖拽指示器动画 */
+.drop-indicator {
+  animation: dropIndicatorPulse 1s ease-in-out infinite;
+}
+
+@keyframes dropIndicatorPulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1.2);
+  }
+}
+
+/* 选择框动画 */
+.selection-box {
+  animation: selectionBoxGrow 0.2s ease-out;
+}
+
+@keyframes selectionBoxGrow {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 上下文菜单动画 */
+.context-menu {
+  animation: contextMenuSlide 0.2s ease-out;
+  transform-origin: top left;
+}
+
+@keyframes contextMenuSlide {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 工具提示动画 */
+.tooltip {
+  animation: tooltipFade 0.2s ease-out;
+}
+
+@keyframes tooltipFade {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 状态值更新动画 */
+.status-value {
+  transition: all 0.3s ease;
+}
+
+.status-value.updating {
+  animation: statusUpdate 0.4s ease-out;
+}
+
+@keyframes statusUpdate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 配置项动画 */
+.config-item {
+  animation: configItemSlide 0.3s ease-out;
+}
+
+@keyframes configItemSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 删除配置动画 */
+.config-item.removing {
+  animation: configItemRemove 0.3s ease-in forwards;
+}
+
+@keyframes configItemRemove {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    max-height: 60px;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+    max-height: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+/* 响应式动画 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 性能优化 */
+.image-card,
+.btn,
+.setting-card,
+.nav-item {
+  will-change: transform;
+}
+
+.image-card.dragging,
+.multi-drag-preview {
+  will-change: transform, opacity;
+}
+
+.progress-fill {
+  will-change: width;
+}
+
+.toast {
+  will-change: transform, opacity;
+}

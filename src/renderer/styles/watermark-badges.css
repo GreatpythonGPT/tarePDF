@@ -1,0 +1,141 @@
+/* 水印角标样式 */
+.watermark-badges {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  justify-content: center;
+}
+
+.watermark-badge {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  transition: all 0.2s ease;
+  opacity: 1;
+  transform: scale(1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.watermark-badge.active {
+  opacity: 1;
+  transform: scale(1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* 红色角标 - 图片水印A */
+.watermark-badge-red {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.watermark-badge-red:hover {
+  background: linear-gradient(135deg, #f87171, #ef4444);
+}
+
+.watermark-badge-red.active {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+/* 黄色角标 - 图片水印B */
+.watermark-badge-yellow {
+  background: linear-gradient(135deg, #eab308, #ca8a04);
+}
+
+.watermark-badge-yellow:hover {
+  background: linear-gradient(135deg, #fbbf24, #eab308);
+}
+
+.watermark-badge-yellow.active {
+  background: linear-gradient(135deg, #ca8a04, #a16207);
+}
+
+/* 蓝色角标 - 文本水印A */
+.watermark-badge-blue {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.watermark-badge-blue:hover {
+  background: linear-gradient(135deg, #60a5fa, #3b82f6);
+}
+
+.watermark-badge-blue.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+/* 绿色角标 - 文本水印B */
+.watermark-badge-green {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.watermark-badge-green:hover {
+  background: linear-gradient(135deg, #34d399, #10b981);
+}
+
+.watermark-badge-green.active {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .watermark-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+  }
+  
+  .watermark-badges {
+    gap: 3px;
+    margin-top: 4px;
+  }
+}
+
+/* 动画效果 */
+@keyframes watermarkToggle {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.watermark-badge.active {
+  animation: watermarkToggle 0.3s ease;
+}
+
+/* 工具提示样式增强 */
+.watermark-badge[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 4px;
+}
+
+.watermark-badge[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+}

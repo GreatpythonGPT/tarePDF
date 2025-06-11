@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>渲染图演示 PDF 生成器</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <link rel="stylesheet" href="styles/watermark-badges.css">
+    <link rel="stylesheet" href="styles/watermark-controls.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-text">多细胞设计PDF</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="images">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                    </svg>
+                    <span>图片管理</span>
+                </button>
+                
+                <button class="nav-item" data-tab="processing">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                        <circle cx="8" cy="8" r="2" fill="white"/>
+                    </svg>
+                    <span>图片处理</span>
+                </button>
+                
+                <button class="nav-item" data-tab="settings">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>参数设置</span>
+                </button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="quick-actions">
+                    <button class="btn btn-primary btn-generate-pdf" id="quick-generate-pdf">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                            <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.697 19.697 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029zm1.379-1.901c-.166.076-.32.156-.459.238-.328.194-.541.383-.647.547-.094.145-.096.25-.04.361.01.022.02.036.026.044a.266.266 0 0 0 .035-.012c.137-.056.355-.235.635-.572a8.18 8.18 0 0 0 .45-.606zm1.64-1.33a12.71 12.71 0 0 1 1.01-.193 11.744 11.744 0 0 1-.51-.858 20.801 20.801 0 0 1-.5 1.05zm2.446.45c.15.163.296.3.435.41.24.19.407.253.498.256a.107.107 0 0 0 .07-.015.307.307 0 0 0 .094-.125.436.436 0 0 0 .059-.2.095.095 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a3.876 3.876 0 0 0-.612-.053zM8.078 7.8a6.7 6.7 0 0 0 .2-.828c.031-.188.043-.343.038-.465a.613.613 0 0 0-.032-.198.517.517 0 0 0-.145.04c-.087.035-.158.106-.196.283-.04.192-.03.469.046.822.024.111.054.227.089.346z"/>
+                        </svg>
+                        生成PDF
+                    </button>
+                </div>
+                <div class="status-info">
+                    <div class="status-item">
+                        <span class="status-label">总数:</span>
+                        <span class="status-value" id="total-count">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">已选:</span>
+                        <span class="status-value" id="selected-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主工作区 -->
+        <main class="main-content">
+            <!-- 图片管理页面 -->
+            <div id="images-tab" class="tab-content active">
+                <div class="tab-header">
+                    <h1>图片管理</h1>
+                    <div class="toolbar">
+                        <!-- 水印控制按钮 -->
+                        <div class="watermark-controls">
+                            <button class="watermark-control-btn watermark-control-a" id="watermark-control-a" title="图片水印A">
+                                A
+                            </button>
+                            <button class="watermark-control-btn watermark-control-b" id="watermark-control-b" title="图片水印B">
+                                B
+                            </button>
+                            <button class="watermark-control-btn watermark-control-c" id="watermark-control-c" title="文本水印C">
+                                C
+                            </button>
+                            <button class="watermark-control-btn watermark-control-d" id="watermark-control-d" title="文本水印D">
+                                D
+                            </button>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="import-btn">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M8 2a.5.5 0 01.5.5v5.793l2.146-2.147a.5.5 0 01.708.708l-3 3a.5.5 0 01-.708 0l-3-3a.5.5 0 11.708-.708L7.5 8.293V2.5A.5.5 0 018 2z"/>
+                                <path d="M3 9.5a.5.5 0 01.5-.5h9a.5.5 0 010 1h-9a.5.5 0 01-.5-.5z"/>
+                            </svg>
+                            导入图片
+                        </button>
+                        <button class="btn btn-secondary" id="select-all-btn">全选</button>
+                        <button class="btn btn-secondary" id="clear-selection-btn">清空选择</button>
+                        <button class="btn btn-danger" id="delete-selected-btn">删除选定</button>
+                    </div>
+                </div>
+                
+                <div class="images-container">
+                    <div id="images-grid" class="images-grid">
+                        <div class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                                <rect x="8" y="12" width="48" height="36" rx="4" stroke="#D1D5DB" stroke-width="2" fill="none"/>
+                                <circle cx="20" cy="24" r="3" fill="#D1D5DB"/>
+                                <path d="M8 40l8-8 6 6 12-12 18 18v4a4 4 0 01-4 4H12a4 4 0 01-4-4v-8z" fill="#E5E7EB"/>
+                            </svg>
+                            <p>点击"导入图片"开始添加图片</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 参数设置页面 -->
+            <div id="settings-tab" class="tab-content">
+                <div class="tab-header">
+                    <h1>参数设置</h1>
+                    <div class="toolbar">
+                        <button class="btn btn-success" id="export-pdf-btn">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M14 14V4.5L9.5 0H4a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2zM9.5 3A1.5 1.5 0 0011 4.5h2V14a1 1 0 01-1 1H4a1 1 0 01-1-1V2a1 1 0 011-1h5.5v2z"/>
+                            </svg>
+                            生成 PDF
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="settings-container">
+                    <div class="settings-grid">
+                        <!-- 输出尺寸设置 -->
+                        <div class="setting-card">
+                            <h3>输出尺寸</h3>
+                            <div class="form-group">
+                                <label for="output-width">统一宽度 (px)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="output-width-slider" min="100" max="5000" value="1080" step="50" class="form-slider">
+                                    <div class="slider-value">
+                                        <span id="output-width-value">1080</span>px
+                                    </div>
+                                </div>
+                                <input type="number" id="output-width" min="100" max="5000" value="1080" class="form-input slider-input">
+                                <small class="form-help">范围: 100-5000px，图片将等比缩放到此宽度</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>快捷设定</label>
+                                <div class="preset-options">
+                                    <button type="button" class="preset-item" data-width="800">
+                                        <span>800px</span>
+                                    </button>
+                                    <button type="button" class="preset-item" data-width="1080">
+                                        <span>1080px</span>
+                                    </button>
+                                    <button type="button" class="preset-item" data-width="1280">
+                                        <span>1280px</span>
+                                    </button>
+                                    <button type="button" class="preset-item" data-width="1920">
+                                        <span>1920px</span>
+                                    </button>
+                                    <button type="button" class="preset-item" data-width="2550">
+                                        <span>2550px</span>
+                                    </button>
+                                    <button type="button" class="preset-item" data-width="3000">
+                                        <span>3000px</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 水印设置A -->
+                        <div class="setting-card">
+                            <h3>图片水印A</h3>
+                            <div class="form-group">
+                                <label>水印图片 (PNG)</label>
+                                <div class="file-input-group">
+                                    <input type="text" id="watermark-path-a" placeholder="选择PNG水印文件" class="form-input" readonly>
+                                    <button type="button" id="select-watermark-btn-a" class="btn btn-secondary">选择文件</button>
+                                    <button type="button" id="clear-watermark-btn-a" class="btn btn-outline">清除</button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>水印位置</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-position-a" value="top-left" checked>
+                                        <span>左上角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-position-a" value="top-right">
+                                        <span>右上角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-position-a" value="bottom-left">
+                                        <span>左下角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-position-a" value="bottom-right">
+                                        <span>右下角</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="watermark-margin-x-a">水平边距 (px)</label>
+                                    <input type="number" id="watermark-margin-x-a" min="0" max="500" value="20" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="watermark-margin-y-a">垂直边距 (px)</label>
+                                    <input type="number" id="watermark-margin-y-a" min="0" max="500" value="20" class="form-input">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>水印缩放比例</label>
+                                <div class="scale-options">
+                                    <label class="scale-item">
+                                        <input type="radio" name="watermark-scale-a" value="0.25">
+                                        <span>25%</span>
+                                    </label>
+                                    <label class="scale-item">
+                                        <input type="radio" name="watermark-scale-a" value="0.5">
+                                        <span>50%</span>
+                                    </label>
+                                    <label class="scale-item">
+                                        <input type="radio" name="watermark-scale-a" value="0.75" checked>
+                                        <span>75%</span>
+                                    </label>
+                                    <label class="scale-item">
+                                        <input type="radio" name="watermark-scale-a" value="1">
+                                        <span>100%</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 水印设置B -->
+                        <div class="setting-card">
+                            <h3>图片水印B</h3>
+                            <div class="form-group">
+                                <label>水印图片 (PNG)</label>
+                                <div class="file-input-group">
+                                    <input type="text" id="watermark-path-b" placeholder="选择PNG水印文件" class="form-input" readonly>
+                                    <button type="button" id="select-watermark-btn-b" class="btn btn-secondary">选择文件</button>
+                                    <button type="button" id="clear-watermark-btn-b" class="btn btn-outline">清除</button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>水印位置</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-position-b" value="top-left">
+                                        <span>左上角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-position-b" value="top-right" checked>
+                                        <span>右上角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-position-b" value="bottom-left">
+                                        <span>左下角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-position-b" value="bottom-right">
+                                        <span>右下角</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="watermark-margin-x-b">水平边距 (px)</label>
+                                    <input type="number" id="watermark-margin-x-b" min="0" max="500" value="20" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="watermark-margin-y-b">垂直边距 (px)</label>
+                                    <input type="number" id="watermark-margin-y-b" min="0" max="500" value="20" class="form-input">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>水印缩放比例</label>
+                                <div class="scale-options">
+                                    <label class="scale-item">
+                                        <input type="radio" name="watermark-scale-b" value="0.25">
+                                        <span>25%</span>
+                                    </label>
+                                    <label class="scale-item">
+                                        <input type="radio" name="watermark-scale-b" value="0.5">
+                                        <span>50%</span>
+                                    </label>
+                                    <label class="scale-item">
+                                         <input type="radio" name="watermark-scale-b" value="0.75" checked>
+                                         <span>75%</span>
+                                     </label>
+                                    <label class="scale-item">
+                                        <input type="radio" name="watermark-scale-b" value="1">
+                                        <span>100%</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 水印文本C设置 -->
+                        <div class="setting-card">
+                            <h3>水印文本C</h3>
+                            <div class="form-group">
+                                <label for="watermark-text-a-content">水印文本</label>
+                                <textarea id="watermark-text-a-content" class="form-textarea" placeholder="输入水印文本内容" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="watermark-text-a-font-size">字体大小 (px)</label>
+                                    <input type="number" id="watermark-text-a-font-size" min="8" max="100" value="24" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="watermark-text-a-font-family">字体</label>
+                                    <select id="watermark-text-a-font-family" class="form-select">
+                                        <option value="Microsoft YaHei">微软雅黑</option>
+                                        <option value="SimHei">黑体</option>
+                                        <option value="SimSun">宋体</option>
+                                        <option value="KaiTi">楷体</option>
+                                        <option value="Arial">Arial</option>
+                                        <option value="Times New Roman">Times New Roman</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="watermark-text-a-color">文字颜色</label>
+                                    <input type="color" id="watermark-text-a-color" value="#000000" class="form-color">
+                                </div>
+                                <div class="form-group">
+                                    <label for="watermark-text-a-opacity">透明度</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="watermark-text-a-opacity" min="0.1" max="1" step="0.1" value="0.8" class="form-slider">
+                                        <div class="slider-value">
+                                            <span id="watermark-text-a-opacity-value">80%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>水印位置</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-text-a-position" value="top-left">
+                                        <span>左上角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-text-a-position" value="top-right">
+                                        <span>右上角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-text-a-position" value="bottom-left">
+                                        <span>左下角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-text-a-position" value="bottom-right" checked>
+                                        <span>右下角</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="watermark-text-a-margin-x">水平边距 (px)</label>
+                                    <input type="number" id="watermark-text-a-margin-x" min="0" max="500" value="20" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="watermark-text-a-margin-y">垂直边距 (px)</label>
+                                    <input type="number" id="watermark-text-a-margin-y" min="0" max="500" value="20" class="form-input">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="watermark-text-a-shadow-opacity">阴影透明度</label>
+                                <div class="slider-container">
+                                    <input type="range" id="watermark-text-a-shadow-opacity" min="0" max="1" step="0.1" value="0.3" class="form-slider">
+                                    <div class="slider-value">
+                                        <span id="watermark-text-a-shadow-opacity-value">30%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 水印文本D设置 -->
+                        <div class="setting-card">
+                            <h3>水印文本D</h3>
+                            <div class="form-group">
+                                <label for="watermark-text-b-content">水印文本</label>
+                                <textarea id="watermark-text-b-content" class="form-textarea" placeholder="输入水印文本内容" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="watermark-text-b-font-size">字体大小 (px)</label>
+                                    <input type="number" id="watermark-text-b-font-size" min="8" max="100" value="24" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="watermark-text-b-font-family">字体</label>
+                                    <select id="watermark-text-b-font-family" class="form-select">
+                                        <option value="Microsoft YaHei">微软雅黑</option>
+                                        <option value="SimHei">黑体</option>
+                                        <option value="SimSun">宋体</option>
+                                        <option value="KaiTi">楷体</option>
+                                        <option value="Arial">Arial</option>
+                                        <option value="Times New Roman">Times New Roman</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="watermark-text-b-color">文字颜色</label>
+                                    <input type="color" id="watermark-text-b-color" value="#000000" class="form-color">
+                                </div>
+                                <div class="form-group">
+                                    <label for="watermark-text-b-opacity">透明度</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="watermark-text-b-opacity" min="0.1" max="1" step="0.1" value="0.8" class="form-slider">
+                                        <div class="slider-value">
+                                            <span id="watermark-text-b-opacity-value">80%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>水印位置</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-text-b-position" value="top-left">
+                                        <span>左上角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-text-b-position" value="top-right" checked>
+                                        <span>右上角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-text-b-position" value="bottom-left">
+                                        <span>左下角</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="watermark-text-b-position" value="bottom-right">
+                                        <span>右下角</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="watermark-text-b-margin-x">水平边距 (px)</label>
+                                    <input type="number" id="watermark-text-b-margin-x" min="0" max="500" value="20" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="watermark-text-b-margin-y">垂直边距 (px)</label>
+                                    <input type="number" id="watermark-text-b-margin-y" min="0" max="500" value="20" class="form-input">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="watermark-text-b-shadow-opacity">阴影透明度</label>
+                                <div class="slider-container">
+                                    <input type="range" id="watermark-text-b-shadow-opacity" min="0" max="1" step="0.1" value="0.3" class="form-slider">
+                                    <div class="slider-value">
+                                        <span id="watermark-text-b-shadow-opacity-value">30%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 标题页设置 -->
+                        <div class="setting-card">
+                            <h3>标题页</h3>
+                            <div class="form-group">
+                                <label for="title-text">标题内容</label>
+                                <textarea id="title-text" class="form-textarea" placeholder="输入标题内容，支持换行" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="title-font-size">字体大小 (px)</label>
+                                    <input type="number" id="title-font-size" min="12" max="200" value="48" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label for="title-font-family">字体</label>
+                                    <select id="title-font-family" class="form-select">
+                                        <option value="Microsoft YaHei">微软雅黑</option>
+                                        <option value="SimHei">黑体</option>
+                                        <option value="SimSun">宋体</option>
+                                        <option value="KaiTi">楷体</option>
+                                        <option value="Arial">Arial</option>
+                                        <option value="Times New Roman">Times New Roman</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- 颜色设置已固定为白底黑字，不需要用户调整 -->
+                            <div class="form-row" style="display: none;">
+                                <div class="form-group">
+                                    <label for="title-color">字体颜色</label>
+                                    <input type="color" id="title-color" value="#000000" class="form-color">
+                                </div>
+                                <div class="form-group">
+                                    <label for="title-bg-color">背景颜色</label>
+                                    <input type="color" id="title-bg-color" value="#ffffff" class="form-color">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 分隔页设置 -->
+                        <div class="setting-card">
+                            <h3>分隔页</h3>
+                            <div class="form-group">
+                                <label class="switch-label">
+                                    <input type="checkbox" id="separator-enabled" class="switch-input">
+                                    <span class="switch-slider"></span>
+                                    启用分隔页
+                                </label>
+                                <p class="form-help">在每个图片页面后插入白色分隔页</p>
+                            </div>
+                            
+                            <div class="form-group" id="separator-height-group">
+                                <label for="separator-height">分隔页高度 (px)</label>
+                                <div class="slider-container">
+                                    <input type="range" id="separator-height" min="50" max="300" value="100" class="form-slider">
+                                    <div class="slider-value">
+                                        <input type="number" id="separator-height-value" min="50" max="300" value="100" class="form-input-small">
+                                    </div>
+                                </div>
+                                <p class="form-help">范围: 50-300px，图片间留白高度</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 配置管理 -->
+                        <div class="setting-card">
+                            <h3>配置管理</h3>
+                            <div class="form-group">
+                                <label for="config-name">配置名称</label>
+                                <div class="config-input-group">
+                                    <input type="text" id="config-name" placeholder="输入配置名称" class="form-input">
+                                    <button type="button" id="save-config-btn" class="btn btn-primary">保存配置</button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>已保存的配置</label>
+                                <div class="config-list" id="config-list">
+                                    <div class="empty-config">
+                                        <p>暂无保存的配置</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 图片处理页面 -->
+            <div id="processing-tab" class="tab-content">
+                <div class="processing-layout">
+                    <!-- 主预览区域 (70%高度) -->
+                    <div class="preview-area">
+                        <div class="preview-container">
+                            <div class="preview-image-wrapper">
+                                <canvas id="preview-canvas" class="preview-canvas"></canvas>
+                                <div class="preview-empty-state" style="display: none;">
+                                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                                        <rect x="8" y="12" width="48" height="36" rx="4" stroke="#D1D5DB" stroke-width="2" fill="none"/>
+                                        <circle cx="20" cy="24" r="3" fill="#D1D5DB"/>
+                                        <path d="M8 40l8-8 6 6 12-12 18 18v4a4 4 0 01-4 4H12a4 4 0 01-4-4v-8z" fill="#E5E7EB"/>
+                                    </svg>
+                                    <p>选择图片开始处理</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 预览工具栏 -->
+                            <div class="preview-toolbar">
+                                <button class="preview-tool-btn" id="zoom-fit" title="适合窗口">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+                                    </svg>
+                                </button>
+                                <button class="preview-tool-btn" id="zoom-100" title="100%">
+                                    <span>1:1</span>
+                                </button>
+                                <button class="preview-tool-btn" id="compare-mode" title="对比模式">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M8 0a.5.5 0 0 1 .5.5V8h7a.5.5 0 0 1 0 1H8.5v7a.5.5 0 0 1-1 0V9H.5a.5.5 0 0 1 0-1H7.5V.5A.5.5 0 0 1 8 0z"/>
+                                    </svg>
+                                </button>
+                                <div class="zoom-info">
+                                    <span id="zoom-level">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 缩略图条 (20%高度) -->
+                    <div class="thumbnail-strip">
+                        <div class="thumbnail-container" id="processing-thumbnails">
+                            <div class="thumbnail-empty-state">
+                                <p>从图片管理导入图片后，在此处选择要处理的图片</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧调整面板 (固定300px宽度) -->
+                    <div class="adjustment-panel">
+                        <div class="panel-header">
+                            <h3>图像调整</h3>
+                            <div class="panel-actions">
+                                <button class="btn btn-outline btn-sm" id="reset-adjustments">重置</button>
+                                <button class="btn btn-primary btn-sm" id="apply-adjustments">应用</button>
+                            </div>
+                        </div>
+                        
+                        <div class="panel-content">
+                            <!-- 基础调整 -->
+                            <div class="adjustment-group">
+                                <h4>基础调整</h4>
+                                
+                                <div class="adjustment-item">
+                                    <label for="brightness-slider">亮度</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="brightness-slider" min="-100" max="100" value="0" class="adjustment-slider">
+                                        <div class="slider-value">
+                                            <input type="number" id="brightness-value" min="-100" max="100" value="0" class="adjustment-input">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="adjustment-item">
+                                    <label for="contrast-slider">对比度</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="contrast-slider" min="-100" max="100" value="0" class="adjustment-slider">
+                                        <div class="slider-value">
+                                            <input type="number" id="contrast-value" min="-100" max="100" value="0" class="adjustment-input">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="adjustment-item">
+                                    <label for="saturation-slider">饱和度</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="saturation-slider" min="-100" max="100" value="0" class="adjustment-slider">
+                                        <div class="slider-value">
+                                            <input type="number" id="saturation-value" min="-100" max="100" value="0" class="adjustment-input">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="adjustment-item">
+                                    <label for="sharpness-slider">锐化</label>
+                                    <div class="slider-container">
+                                        <input type="range" id="sharpness-slider" min="0" max="100" value="0" class="adjustment-slider">
+                                        <div class="slider-value">
+                                            <input type="number" id="sharpness-value" min="0" max="100" value="0" class="adjustment-input">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- RGB曲线 -->
+                            <div class="adjustment-group">
+                                <h4>RGB曲线</h4>
+                                <div class="curve-editor">
+                                    <div class="curve-tabs">
+                                        <button class="curve-tab active" data-channel="rgb">RGB</button>
+                                        <button class="curve-tab" data-channel="red">红</button>
+                                        <button class="curve-tab" data-channel="green">绿</button>
+                                        <button class="curve-tab" data-channel="blue">蓝</button>
+                                    </div>
+                                    <div class="curve-canvas-container">
+                                        <canvas id="curve-canvas" width="280" height="200" class="curve-canvas"></canvas>
+                                        <div class="curve-grid"></div>
+                                    </div>
+                                    <div class="curve-actions">
+                                        <button class="btn btn-outline btn-xs" id="reset-curve">重置曲线</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 批量操作 -->
+                            <div class="adjustment-group">
+                                <h4>批量操作</h4>
+                                <div class="batch-actions">
+                                    <button class="btn btn-secondary btn-sm" id="copy-adjustments">复制调整</button>
+                                    <button class="btn btn-secondary btn-sm" id="paste-adjustments">粘贴调整</button>
+                                    <button class="btn btn-primary btn-sm" id="apply-to-selected">应用到选中</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Toast 通知 -->
+    <div id="toast-container" class="toast-container"></div>
+    
+    <!-- 拖拽指示线 -->
+    <div id="drop-indicator" class="drop-indicator"></div>
+    
+    <!-- 加载遮罩 -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p id="loading-text">处理中...</p>
+        </div>
+    </div>
+    
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/settingsManager.js"></script>
+    <script src="scripts/imageManager.js"></script>
+    <script src="scripts/imageProcessor.js"></script>
+    <script src="scripts/pdfGenerator.js"></script>
+    <script src="scripts/main.js"></script>
+    
+    <!-- 添加控制台输出显示 -->
+    <div id="console-output" style="position: fixed; bottom: 10px; right: 10px; width: 400px; height: 200px; background: rgba(0,0,0,0.8); color: white; font-family: monospace; font-size: 12px; padding: 10px; overflow-y: auto; z-index: 9999; border-radius: 5px; display: none;">
+        <div style="text-align: right; margin-bottom: 5px;">
+            <button onclick="document.getElementById('console-output').style.display='none'" style="background: red; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer;">关闭</button>
+            <button onclick="document.getElementById('console-log').innerHTML=''" style="background: blue; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; margin-left: 5px;">清空</button>
+        </div>
+        <div id="console-log"></div>
+    </div>
+    
+    <script>
+        // 显示控制台
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                const consoleDiv = document.getElementById('console-output');
+                consoleDiv.style.display = consoleDiv.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+        
+        // 重写console.log
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToConsole(type, ...args) {
+            const logDiv = document.getElementById('console-log');
+            if (logDiv) {
+                const timestamp = new Date().toLocaleTimeString();
+                const message = args.map(arg => 
+                    typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+                ).join(' ');
+                
+                const logEntry = document.createElement('div');
+                logEntry.style.marginBottom = '2px';
+                logEntry.style.color = type === 'error' ? '#ff6b6b' : type === 'warn' ? '#ffd93d' : '#6bcf7f';
+                logEntry.textContent = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+                
+                logDiv.appendChild(logEntry);
+                logDiv.scrollTop = logDiv.scrollHeight;
+                
+                // 限制日志条数
+                while (logDiv.children.length > 100) {
+                    logDiv.removeChild(logDiv.firstChild);
+                }
+            }
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToConsole('log', ...args);
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToConsole('error', ...args);
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToConsole('warn', ...args);
+        };
+    </script>
+</body>
+</html>

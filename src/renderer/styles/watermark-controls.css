@@ -1,0 +1,129 @@
+.watermark-controls {
+    display: flex;
+    gap: 8px;
+    margin-right: 16px;
+    align-items: center;
+}
+
+.watermark-control-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.watermark-control-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.watermark-control-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 按钮颜色 */
+.watermark-control-a {
+    background: #ef4444; /* 红色 - 图片水印A */
+}
+
+.watermark-control-a:hover {
+    background: #dc2626;
+}
+
+.watermark-control-a.active {
+    background: #b91c1c;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+}
+
+.watermark-control-b {
+    background: #f59e0b; /* 黄色 - 图片水印B */
+}
+
+.watermark-control-b:hover {
+    background: #d97706;
+}
+
+.watermark-control-b.active {
+    background: #b45309;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+}
+
+.watermark-control-c {
+    background: #3b82f6; /* 蓝色 - 文本水印C */
+}
+
+.watermark-control-c:hover {
+    background: #2563eb;
+}
+
+.watermark-control-c.active {
+    background: #1d4ed8;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.watermark-control-d {
+    background: #10b981; /* 绿色 - 文本水印D */
+}
+
+.watermark-control-d:hover {
+    background: #059669;
+}
+
+.watermark-control-d.active {
+    background: #047857;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+}
+
+/* 禁用状态 */
+.watermark-control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.watermark-control-btn:disabled:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .watermark-controls {
+        gap: 6px;
+        margin-right: 12px;
+    }
+    
+    .watermark-control-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+}
+
+/* 动画效果 */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+.watermark-control-btn.pulse {
+    animation: pulse 1s ease-out;
+}
