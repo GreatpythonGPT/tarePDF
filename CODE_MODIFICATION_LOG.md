@@ -23,9 +23,5 @@ This project is an Electron based image management and PDF generation tool desig
 3. **Documentation**
    - Created this `CODE_MODIFICATION_LOG.md` to record project understanding and modifications for future reference.
 
-4. **Image Reset Improvements (2024‑06‑12)**
-   - Stored each image's original file and URL in `imageManager` so the original picture is retained after applying adjustments.
-   - `imageProcessor` now loads original data from these files and restores them when pressing reset, even after switching images.
-   - Improved the RGB curve grid to have evenly spaced lines for a cleaner look.
-   - Quick PDF button now calls `pdfGenerator.generatePDF()` directly for faster exporting.
+
 
