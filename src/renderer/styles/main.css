@@ -827,27 +827,17 @@ html, body {
   transition: transform 0.2s ease;
 }
 
+.annotation-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 .preview-canvas:active {
   cursor: grabbing;
-}
-
-.preview-empty-state {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  color: #888;
-  font-size: 16px;
-  z-index: 10;
-}
-
-.preview-empty-state svg {
-  opacity: 0.5;
 }
 
 /* 预览工具栏 */
@@ -864,6 +854,25 @@ html, body {
   padding: 8px 16px;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.annotation-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+}
+
+.annotation-color,
+.annotation-size,
+.annotation-font {
+  width: 48px;
+  height: 28px;
+  background: #1e1e1e;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px;
 }
 
 .preview-tool-btn {

@@ -11,6 +11,17 @@ class ImageProcessor {
         this.panX = 0;
         this.panY = 0;
         this.compareMode = false;
+
+        // 标注相关
+        this.annotationCanvas = null;
+        this.annotationCtx = null;
+        this.annotationTool = null;
+        this.annotationColor = '#ff0000';
+        this.annotationSize = 2;
+        this.annotationFont = 20;
+        this.isAnnotating = false;
+        this.startX = 0;
+        this.startY = 0;
         
         // 调整参数
         this.adjustments = {
@@ -38,6 +49,7 @@ class ImageProcessor {
     init() {
         this.bindEvents();
         this.initCanvas();
+        this.initAnnotationCanvas();
         this.initCurveEditor();
         console.log('图片处理器初始化完成');
     }
@@ -65,6 +77,9 @@ class ImageProcessor {
         
         // 画布事件
         this.bindCanvasEvents();
+
+        // 标注工具事件
+        this.bindAnnotationEvents();
         
         // 缩略图容器中键滚动事件
         this.bindThumbnailScrollEvents();
@@ -158,12 +173,48 @@ class ImageProcessor {
             });
         }
     }
+
+    bindAnnotationEvents() {
+        document.querySelectorAll('.annotation-tool').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.annotation-tool').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.annotationTool = btn.dataset.tool;
+                if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'auto';
+            });
+        });
+
+        const colorInput = document.getElementById('annotation-color');
+        if (colorInput) colorInput.addEventListener('change', e => this.annotationColor = e.target.value);
+
+        const sizeInput = document.getElementById('annotation-size');
+        if (sizeInput) sizeInput.addEventListener('change', e => this.annotationSize = parseInt(e.target.value) || 2);
+
+        const fontInput = document.getElementById('annotation-font');
+        if (fontInput) fontInput.addEventListener('change', e => this.annotationFont = parseInt(e.target.value) || 20);
+
+        if (this.annotationCanvas) {
+            this.annotationCanvas.addEventListener('mousedown', e => this.onAnnotDown(e));
+            this.annotationCanvas.addEventListener('mousemove', e => this.onAnnotMove(e));
+            this.annotationCanvas.addEventListener('mouseup', e => this.onAnnotUp(e));
+            this.annotationCanvas.addEventListener('mouseleave', e => this.onAnnotUp(e));
+        }
+    }
     
     initCanvas() {
         const canvas = document.getElementById('preview-canvas');
         if (canvas) {
             this.canvas = canvas;
             this.ctx = canvas.getContext('2d');
+            this.resizeCanvas();
+        }
+    }
+
+    initAnnotationCanvas() {
+        const canvas = document.getElementById('annotation-canvas');
+        if (canvas) {
+            this.annotationCanvas = canvas;
+            this.annotationCtx = canvas.getContext('2d');
             this.resizeCanvas();
         }
     }
@@ -369,11 +420,15 @@ class ImageProcessor {
     
     resizeCanvas() {
         if (!this.canvas) return;
-        
+
         const container = this.canvas.parentElement;
         if (container) {
             this.canvas.width = container.clientWidth;
             this.canvas.height = container.clientHeight;
+            if (this.annotationCanvas) {
+                this.annotationCanvas.width = container.clientWidth;
+                this.annotationCanvas.height = container.clientHeight;
+            }
         }
     }
     
@@ -475,6 +530,84 @@ class ImageProcessor {
     onCanvasMouseUp() {
         this.isDragging = false;
         this.canvas.style.cursor = 'grab';
+    }
+
+    onAnnotDown(e) {
+        if (!this.annotationTool) return;
+        const rect = this.annotationCanvas.getBoundingClientRect();
+        this.startX = e.clientX - rect.left;
+        this.startY = e.clientY - rect.top;
+        this.isAnnotating = true;
+
+        if (this.annotationTool === 'pencil') {
+            this.annotationCtx.strokeStyle = this.annotationColor;
+            this.annotationCtx.lineWidth = this.annotationSize;
+            this.annotationCtx.beginPath();
+            this.annotationCtx.moveTo(this.startX, this.startY);
+        } else if (this.annotationTool === 'text') {
+            const text = prompt('输入文本');
+            if (text) {
+                this.annotationCtx.fillStyle = this.annotationColor;
+                this.annotationCtx.font = `${this.annotationFont}px sans-serif`;
+                this.annotationCtx.fillText(text, this.startX, this.startY);
+            }
+            this.isAnnotating = false;
+        }
+    }
+
+    onAnnotMove(e) {
+        if (!this.isAnnotating || !this.annotationTool) return;
+        const rect = this.annotationCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        if (this.annotationTool === 'pencil') {
+            this.annotationCtx.lineTo(x, y);
+            this.annotationCtx.stroke();
+        }
+    }
+
+    onAnnotUp(e) {
+        if (!this.isAnnotating || !this.annotationTool) return;
+        this.isAnnotating = false;
+        const rect = this.annotationCanvas.getBoundingClientRect();
+        const endX = e.clientX - rect.left;
+        const endY = e.clientY - rect.top;
+
+        this.annotationCtx.strokeStyle = this.annotationColor;
+        this.annotationCtx.lineWidth = this.annotationSize;
+
+        if (this.annotationTool === 'rect') {
+            this.annotationCtx.strokeRect(this.startX, this.startY, endX - this.startX, endY - this.startY);
+        } else if (this.annotationTool === 'arrow') {
+            this.drawArrow(this.startX, this.startY, endX, endY);
+        } else if (this.annotationTool === 'pencil') {
+            this.annotationCtx.lineTo(endX, endY);
+            this.annotationCtx.stroke();
+        }
+    }
+
+    drawArrow(x1, y1, x2, y2) {
+        const ctx = this.annotationCtx;
+        const headlen = 10 + this.annotationSize * 2;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.lineTo(x2, y2);
+        ctx.fillStyle = this.annotationColor;
+        ctx.fill();
+    }
+
+    clearAnnotations() {
+        if (this.annotationCtx && this.annotationCanvas) {
+            this.annotationCtx.clearRect(0, 0, this.annotationCanvas.width, this.annotationCanvas.height);
+        }
     }
     
     // 图像调整功能
@@ -860,6 +993,7 @@ class ImageProcessor {
         } else {
             this.processedImageData = null;
         }
+
         
         // 更新UI
         this.updateAdjustmentUI();
@@ -871,6 +1005,7 @@ class ImageProcessor {
     }
 
     restoreOriginalImage() {
+
 
         if (!this.originalImageData || this.selectedThumbnailIndex === -1) return;
 
@@ -908,12 +1043,15 @@ class ImageProcessor {
                 }
 
 
+
                 this.processedImageData = null;
                 this.drawImageToCanvas();
             };
             img.src = url;
 
+
         }, 'image/png');
+
 
     }
     
@@ -948,6 +1086,11 @@ class ImageProcessor {
         tempCanvas.width = this.processedImageData.width;
         tempCanvas.height = this.processedImageData.height;
         tempCtx.putImageData(this.processedImageData, 0, 0);
+
+        // 合并标注
+        if (this.annotationCanvas) {
+            tempCtx.drawImage(this.annotationCanvas, 0, 0, this.annotationCanvas.width, this.annotationCanvas.height, 0, 0, tempCanvas.width, tempCanvas.height);
+        }
         
         // 转换为blob并更新图片
         tempCanvas.toBlob((blob) => {
@@ -996,7 +1139,9 @@ class ImageProcessor {
                 
                 console.log('调整已应用到当前图片，原始图像数据已保留用于重置功能');
                 
-                // 重新绘制
+                // 清除标注并重新绘制
+                this.clearAnnotations();
+                if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
                 this.drawImageToCanvas();
                 
                 console.log('调整已应用到当前图片');

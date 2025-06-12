@@ -22,6 +22,3 @@ This project is an Electron based image management and PDF generation tool desig
 
 3. **Documentation**
    - Created this `CODE_MODIFICATION_LOG.md` to record project understanding and modifications for future reference.
-
-
-
