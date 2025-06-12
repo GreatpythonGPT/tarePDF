@@ -22,18 +22,3 @@ This project is an Electron based image management and PDF generation tool desig
 
 3. **Documentation**
    - Created this `CODE_MODIFICATION_LOG.md` to record project understanding and modifications for future reference.
-
-4. **Image Reset Improvements (2024‑06‑12)**
-   - Stored each image's original file and URL in `imageManager` so the original picture is retained after applying adjustments.
-   - `imageProcessor` now loads original data from these files and restores them when pressing reset, even after switching images.
-   - Improved the RGB curve grid to have evenly spaced lines for a cleaner look.
-   - Quick PDF button now calls `pdfGenerator.generatePDF()` directly for faster exporting.
-
-
-5. **UI Cleanup**
-   - Removed the preview placeholder image and caption to keep the canvas uncluttered.
-
-6. **Annotation Tools (2025-06-12)**
-   - Added an overlay `annotation-canvas` and toolbar buttons for pencil, arrow, rectangle and text annotations in the processing page.
-   - Users can change annotation color, line width and text size.
-   - Annotations merge into the image when applying adjustments and clear when switching images or resetting.

@@ -318,9 +318,6 @@ class ImageProcessor {
                 this.saveOriginalImageData(img);
             }
 
-            this.clearAnnotations();
-            if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
-
             // 重置调整参数
             this.resetAdjustments(false);
 
@@ -997,8 +994,6 @@ class ImageProcessor {
             this.processedImageData = null;
         }
 
-        this.clearAnnotations();
-        if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
         
         // 更新UI
         this.updateAdjustmentUI();
@@ -1010,73 +1005,54 @@ class ImageProcessor {
     }
 
     restoreOriginalImage() {
-        if (this.selectedThumbnailIndex === -1) return;
 
-        const imageObj = window.imageManager?.images?.[this.selectedThumbnailIndex];
-        if (!imageObj) return;
 
-        const originalFile = imageObj.originalFile;
-        if (!originalFile && !this.originalImageData) return;
+        if (!this.originalImageData || this.selectedThumbnailIndex === -1) return;
 
-        if (originalFile) {
-            const url = URL.createObjectURL(originalFile);
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = this.originalImageData.width;
+        tempCanvas.height = this.originalImageData.height;
+        tempCtx.putImageData(this.originalImageData, 0, 0);
+
+        tempCanvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
             const img = new Image();
             img.onload = () => {
                 this.currentImage = img;
-                this.saveOriginalImageData(img);
 
-                if (imageObj.url) {
-                    URL.revokeObjectURL(imageObj.url);
+                if (window.imageManager && window.imageManager.images && this.selectedThumbnailIndex < window.imageManager.images.length) {
+                    const imageObj = window.imageManager.images[this.selectedThumbnailIndex];
+                    if (imageObj) {
+                        if (imageObj.url) {
+                            URL.revokeObjectURL(imageObj.url);
+                        }
+
+                        const file = new File([blob], imageObj.name || 'image.png', { type: 'image/png' });
+                        imageObj.file = file;
+                        imageObj.url = url;
+                        imageObj.size = blob.size;
+                        imageObj.width = this.originalImageData.width;
+                        imageObj.height = this.originalImageData.height;
+
+                        utils.createThumbnail(file, 200).then(thumbnail => {
+                            imageObj.thumbnail = thumbnail;
+                            window.imageManager.renderImages();
+                        }).catch(err => console.warn('更新缩略图失败:', err));
+                    }
                 }
 
-                imageObj.file = originalFile;
-                imageObj.url = url;
-                imageObj.size = originalFile.size;
-                imageObj.width = img.width;
-                imageObj.height = img.height;
 
-                utils.createThumbnail(originalFile, 200).then(thumbnail => {
-                    imageObj.thumbnail = thumbnail;
-                    window.imageManager.renderImages();
-                }).catch(err => console.warn('更新缩略图失败:', err));
 
                 this.processedImageData = null;
                 this.drawImageToCanvas();
             };
             img.src = url;
-        } else {
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = this.originalImageData.width;
-            tempCanvas.height = this.originalImageData.height;
-            tempCtx.putImageData(this.originalImageData, 0, 0);
 
-            tempCanvas.toBlob((blob) => {
-                const url = URL.createObjectURL(blob);
-                const img = new Image();
-                img.onload = () => {
-                    this.currentImage = img;
-                    if (imageObj.url) {
-                        URL.revokeObjectURL(imageObj.url);
-                    }
-                    const file = new File([blob], imageObj.name || 'image.png', { type: 'image/png' });
-                    imageObj.file = file;
-                    imageObj.url = url;
-                    imageObj.size = blob.size;
-                    imageObj.width = this.originalImageData.width;
-                    imageObj.height = this.originalImageData.height;
 
-                    utils.createThumbnail(file, 200).then(thumbnail => {
-                        imageObj.thumbnail = thumbnail;
-                        window.imageManager.renderImages();
-                    }).catch(err => console.warn('更新缩略图失败:', err));
+        }, 'image/png');
 
-                    this.processedImageData = null;
-                    this.drawImageToCanvas();
-                };
-                img.src = url;
-            }, 'image/png');
-        }
+
     }
     
     updateAdjustmentUI() {
