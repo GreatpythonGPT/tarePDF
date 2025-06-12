@@ -147,6 +147,12 @@ class ImageProcessor {
             canvas.addEventListener('mouseup', () => this.onCanvasMouseUp());
             canvas.addEventListener('mouseleave', () => this.onCanvasMouseUp());
         }
+
+        // 允许在标注画布覆盖时也能缩放
+        const wrapper = document.querySelector('.preview-image-wrapper');
+        if (wrapper) {
+            wrapper.addEventListener('wheel', (e) => this.onCanvasWheel(e));
+        }
     }
     
     bindThumbnailScrollEvents() {
@@ -177,10 +183,12 @@ class ImageProcessor {
     bindAnnotationEvents() {
         document.querySelectorAll('.annotation-tool').forEach(btn => {
             btn.addEventListener('click', () => {
+
                 document.querySelectorAll('.annotation-tool').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.annotationTool = btn.dataset.tool;
                 if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'auto';
+
             });
         });
 
@@ -994,6 +1002,7 @@ class ImageProcessor {
             this.processedImageData = null;
         }
 
+
         
         // 更新UI
         this.updateAdjustmentUI();
@@ -1042,6 +1051,7 @@ class ImageProcessor {
                         }).catch(err => console.warn('更新缩略图失败:', err));
                     }
                 }
+
 
 
 
@@ -1145,6 +1155,7 @@ class ImageProcessor {
                 // 清除标注并重新绘制
                 this.clearAnnotations();
                 if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
+
                 this.drawImageToCanvas();
                 
                 console.log('调整已应用到当前图片');
