@@ -52,7 +52,7 @@ class ImageProcessor {
         this.bindAdjustmentSliders();
         
         // 操作按钮事件
-        document.getElementById('reset-adjustments')?.addEventListener('click', () => this.resetAdjustments());
+        document.getElementById('reset-adjustments')?.addEventListener('click', () => this.resetAdjustments(true, true));
         document.getElementById('apply-adjustments')?.addEventListener('click', () => this.applyAdjustments());
         
         // 曲线编辑器事件
@@ -259,18 +259,32 @@ class ImageProcessor {
         img.onload = () => {
             this.currentImage = img;
             this.processedImageData = null;
-            
-            // 保存原始图像数据
-            this.saveOriginalImageData(img);
-            
+
+            // 使用原始文件生成原始图像数据，以便后续重置
+            if (imageData.originalFile) {
+                this.loadOriginalData(imageData.originalFile);
+            } else {
+                this.saveOriginalImageData(img);
+            }
+
             // 重置调整参数
             this.resetAdjustments(false);
-            
+
             // 绘制图片
             this.drawImageToCanvas();
             this.zoomToFit();
         };
         img.src = imageData.url;
+    }
+
+    loadOriginalData(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const origin = new Image();
+            origin.onload = () => this.saveOriginalImageData(origin);
+            origin.src = reader.result;
+        };
+        reader.readAsDataURL(file);
     }
     
     saveOriginalImageData(img) {
@@ -552,33 +566,41 @@ class ImageProcessor {
     
     applySharpness(imageData, sharpness) {
         if (sharpness === 0) return imageData;
-        
-        // 简化的锐化算法
+
         const data = imageData.data;
         const width = imageData.width;
         const height = imageData.height;
-        const factor = sharpness / 100;
-        
-        const newData = new Uint8ClampedArray(data);
-        
+        const factor = sharpness / 50; // 强度系数
+
+        const result = new Uint8ClampedArray(data.length);
+        const kernel = [
+            0, -1, 0,
+            -1, 5, -1,
+            0, -1, 0
+        ];
+
+        const get = (x, y, c) => data[(y * width + x) * 4 + c];
+
         for (let y = 1; y < height - 1; y++) {
             for (let x = 1; x < width - 1; x++) {
                 const idx = (y * width + x) * 4;
-                
+
                 for (let c = 0; c < 3; c++) {
-                    const current = data[idx + c];
-                    const top = data[((y - 1) * width + x) * 4 + c];
-                    const bottom = data[((y + 1) * width + x) * 4 + c];
-                    const left = data[(y * width + (x - 1)) * 4 + c];
-                    const right = data[(y * width + (x + 1)) * 4 + c];
-                    
-                    const edge = current * 5 - top - bottom - left - right;
-                    newData[idx + c] = Math.max(0, Math.min(255, current + edge * factor));
+                    let sum = 0;
+                    let k = 0;
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            sum += get(x + kx, y + ky, c) * kernel[k++];
+                        }
+                    }
+                    const val = data[idx + c] + factor * (sum - data[idx + c]);
+                    result[idx + c] = Math.max(0, Math.min(255, val));
                 }
+                result[idx + 3] = data[idx + 3];
             }
         }
-        
-        return new ImageData(newData, width, height);
+
+        return new ImageData(result, width, height);
     }
     
     applyCurves(imageData) {
@@ -650,18 +672,19 @@ class ImageProcessor {
         ctx.fillRect(0, 0, width, height);
         
         // 绘制网格
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
         ctx.lineWidth = 1;
-        
-        for (let i = 0; i <= 4; i++) {
-            const x = (width / 4) * i;
-            const y = (height / 4) * i;
-            
+        const grid = 8;
+
+        for (let i = 0; i <= grid; i++) {
+            const x = (width / grid) * i;
+            const y = (height / grid) * i;
+
             ctx.beginPath();
             ctx.moveTo(x, 0);
             ctx.lineTo(x, height);
             ctx.stroke();
-            
+
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(width, y);
@@ -817,7 +840,7 @@ class ImageProcessor {
     }
     
     // 调整参数操作
-    resetAdjustments(redraw = true) {
+    resetAdjustments(redraw = true, restoreImage = false) {
         this.adjustments = {
             brightness: 0,
             contrast: 0,
@@ -831,8 +854,12 @@ class ImageProcessor {
             }
         };
         
-        // 重置为原始图像数据
-        this.processedImageData = null;
+        // 恢复原始图片
+        if (restoreImage) {
+            this.restoreOriginalImage();
+        } else {
+            this.processedImageData = null;
+        }
         
         // 更新UI
         this.updateAdjustmentUI();
@@ -840,6 +867,76 @@ class ImageProcessor {
         if (redraw) {
             this.drawImageToCanvas();
             this.drawCurve();
+        }
+    }
+
+    restoreOriginalImage() {
+        if (this.selectedThumbnailIndex === -1) return;
+
+        const imageObj = window.imageManager?.images?.[this.selectedThumbnailIndex];
+        if (!imageObj) return;
+
+        const originalFile = imageObj.originalFile;
+        if (!originalFile && !this.originalImageData) return;
+
+        if (originalFile) {
+            const url = URL.createObjectURL(originalFile);
+            const img = new Image();
+            img.onload = () => {
+                this.currentImage = img;
+                this.saveOriginalImageData(img);
+
+                if (imageObj.url) {
+                    URL.revokeObjectURL(imageObj.url);
+                }
+
+                imageObj.file = originalFile;
+                imageObj.url = url;
+                imageObj.size = originalFile.size;
+                imageObj.width = img.width;
+                imageObj.height = img.height;
+
+                utils.createThumbnail(originalFile, 200).then(thumbnail => {
+                    imageObj.thumbnail = thumbnail;
+                    window.imageManager.renderImages();
+                }).catch(err => console.warn('更新缩略图失败:', err));
+
+                this.processedImageData = null;
+                this.drawImageToCanvas();
+            };
+            img.src = url;
+        } else {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = this.originalImageData.width;
+            tempCanvas.height = this.originalImageData.height;
+            tempCtx.putImageData(this.originalImageData, 0, 0);
+
+            tempCanvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const img = new Image();
+                img.onload = () => {
+                    this.currentImage = img;
+                    if (imageObj.url) {
+                        URL.revokeObjectURL(imageObj.url);
+                    }
+                    const file = new File([blob], imageObj.name || 'image.png', { type: 'image/png' });
+                    imageObj.file = file;
+                    imageObj.url = url;
+                    imageObj.size = blob.size;
+                    imageObj.width = this.originalImageData.width;
+                    imageObj.height = this.originalImageData.height;
+
+                    utils.createThumbnail(file, 200).then(thumbnail => {
+                        imageObj.thumbnail = thumbnail;
+                        window.imageManager.renderImages();
+                    }).catch(err => console.warn('更新缩略图失败:', err));
+
+                    this.processedImageData = null;
+                    this.drawImageToCanvas();
+                };
+                img.src = url;
+            }, 'image/png');
         }
     }
     
@@ -917,8 +1014,8 @@ class ImageProcessor {
                 // 保留原始图像数据，只清空处理后的数据
                 this.processedImageData = null;
                 
-                // 重置调整参数
-                this.resetAdjustments();
+                // 重置调整参数（不恢复原图）
+                this.resetAdjustments(false);
                 
                 console.log('调整已应用到当前图片，原始图像数据已保留用于重置功能');
                 

@@ -403,7 +403,7 @@ html, body {
 
 /* 表单样式 - Fluent Design */
 .form-group {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .form-group:last-child {
@@ -521,7 +521,7 @@ html, body {
 .radio-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 8px;
 }
 
 .radio-item {
@@ -607,7 +607,7 @@ html, body {
 /* 缩放选项 */
 .scale-options {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .scale-item {
@@ -644,7 +644,7 @@ html, body {
 .preset-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 8px;
 }
 
 .preset-item {
