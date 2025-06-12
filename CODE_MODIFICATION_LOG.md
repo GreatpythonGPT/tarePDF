@@ -21,4 +21,6 @@ This project is an Electron based image management and PDF generation tool desig
    - Reduced vertical spacing inside setting cards by adjusting `.form-group` margins and decreasing gaps for `.radio-group`, `.scale-options` and `.preset-options` in `main.css`.
 
 3. **Documentation**
+
    - Created this `CODE_MODIFICATION_LOG.md` to record project understanding and modifications for future reference.
+

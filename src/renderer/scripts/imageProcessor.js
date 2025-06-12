@@ -47,9 +47,9 @@ class ImageProcessor {
     }
     
     init() {
-        this.bindEvents();
         this.initCanvas();
         this.initAnnotationCanvas();
+
         this.initCurveEditor();
         console.log('图片处理器初始化完成');
     }
@@ -1007,6 +1007,7 @@ class ImageProcessor {
     restoreOriginalImage() {
 
 
+
         if (!this.originalImageData || this.selectedThumbnailIndex === -1) return;
 
         const tempCanvas = document.createElement('canvas');
@@ -1050,7 +1051,9 @@ class ImageProcessor {
             img.src = url;
 
 
+
         }, 'image/png');
+
 
 
     }
