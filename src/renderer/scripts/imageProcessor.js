@@ -259,18 +259,32 @@ class ImageProcessor {
         img.onload = () => {
             this.currentImage = img;
             this.processedImageData = null;
-            
-            // 保存原始图像数据
-            this.saveOriginalImageData(img);
-            
+
+            // 使用原始文件生成原始图像数据，以便后续重置
+            if (imageData.originalFile) {
+                this.loadOriginalData(imageData.originalFile);
+            } else {
+                this.saveOriginalImageData(img);
+            }
+
             // 重置调整参数
             this.resetAdjustments(false);
-            
+
             // 绘制图片
             this.drawImageToCanvas();
             this.zoomToFit();
         };
         img.src = imageData.url;
+    }
+
+    loadOriginalData(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const origin = new Image();
+            origin.onload = () => this.saveOriginalImageData(origin);
+            origin.src = reader.result;
+        };
+        reader.readAsDataURL(file);
     }
     
     saveOriginalImageData(img) {
@@ -658,18 +672,19 @@ class ImageProcessor {
         ctx.fillRect(0, 0, width, height);
         
         // 绘制网格
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
         ctx.lineWidth = 1;
-        
-        for (let i = 0; i <= 4; i++) {
-            const x = (width / 4) * i;
-            const y = (height / 4) * i;
-            
+        const grid = 8;
+
+        for (let i = 0; i <= grid; i++) {
+            const x = (width / grid) * i;
+            const y = (height / grid) * i;
+
             ctx.beginPath();
             ctx.moveTo(x, 0);
             ctx.lineTo(x, height);
             ctx.stroke();
-            
+
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(width, y);
@@ -856,6 +871,7 @@ class ImageProcessor {
     }
 
     restoreOriginalImage() {
+
         if (!this.originalImageData || this.selectedThumbnailIndex === -1) return;
 
         const tempCanvas = document.createElement('canvas');
@@ -891,11 +907,14 @@ class ImageProcessor {
                     }
                 }
 
+
                 this.processedImageData = null;
                 this.drawImageToCanvas();
             };
             img.src = url;
+
         }, 'image/png');
+
     }
     
     updateAdjustmentUI() {
