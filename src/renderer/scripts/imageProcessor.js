@@ -16,12 +16,14 @@ class ImageProcessor {
         this.annotationCanvas = null;
         this.annotationCtx = null;
         this.annotationTool = null;
+
         this.annotationColor = '#ff0000';
         this.annotationSize = 2;
         this.annotationFont = 20;
         this.isAnnotating = false;
         this.startX = 0;
         this.startY = 0;
+
         
         // 调整参数
         this.adjustments = {
@@ -51,6 +53,8 @@ class ImageProcessor {
         this.initAnnotationCanvas();
 
         this.initCurveEditor();
+        const tools = document.getElementById('annotation-tools');
+        if (tools) tools.classList.add('inactive');
         console.log('图片处理器初始化完成');
     }
     
@@ -181,6 +185,7 @@ class ImageProcessor {
     }
 
     bindAnnotationEvents() {
+
         document.querySelectorAll('.annotation-tool').forEach(btn => {
             btn.addEventListener('click', () => {
 
@@ -188,6 +193,7 @@ class ImageProcessor {
                 btn.classList.add('active');
                 this.annotationTool = btn.dataset.tool;
                 if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'auto';
+
 
             });
         });
@@ -200,6 +206,7 @@ class ImageProcessor {
 
         const fontInput = document.getElementById('annotation-font');
         if (fontInput) fontInput.addEventListener('change', e => this.annotationFont = parseInt(e.target.value) || 20);
+
 
         if (this.annotationCanvas) {
             this.annotationCanvas.addEventListener('mousedown', e => this.onAnnotDown(e));
@@ -224,6 +231,7 @@ class ImageProcessor {
             this.annotationCanvas = canvas;
             this.annotationCtx = canvas.getContext('2d');
             this.resizeCanvas();
+
         }
     }
     
@@ -299,6 +307,10 @@ class ImageProcessor {
     }
     
     selectThumbnail(index) {
+        if (this.selectedThumbnailIndex !== -1) {
+            this.applyAnnotationsToImage();
+        }
+
         // 更新选中状态
         document.querySelectorAll('.processing-thumbnail').forEach((thumb, i) => {
             thumb.classList.toggle('selected', i === index);
@@ -325,6 +337,7 @@ class ImageProcessor {
             } else {
                 this.saveOriginalImageData(img);
             }
+
 
             // 重置调整参数
             this.resetAdjustments(false);
@@ -359,8 +372,7 @@ class ImageProcessor {
     drawImageToCanvas() {
         if (!this.currentImage || !this.canvas) return;
         
-        // 调整画布大小
-        this.resizeCanvas();
+
         
         // 清空画布
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -405,6 +417,10 @@ class ImageProcessor {
                 this.ctx.drawImage(this.currentImage, x, y, width, height);
             }
         }
+
+        if (this.annotationCanvas) {
+            this.annotationCanvas.style.transform = `translate(${x}px, ${y}px) scale(${this.zoomLevel})`;
+        }
     }
     
     calculateDrawParams() {
@@ -433,7 +449,9 @@ class ImageProcessor {
         if (container) {
             this.canvas.width = container.clientWidth;
             this.canvas.height = container.clientHeight;
+
             if (this.annotationCanvas) {
+
                 this.annotationCanvas.width = container.clientWidth;
                 this.annotationCanvas.height = container.clientHeight;
             }
@@ -490,17 +508,41 @@ class ImageProcessor {
     
     toggleCompareMode() {
         this.compareMode = !this.compareMode;
-        
+
         const btn = document.getElementById('compare-mode');
         if (btn) {
             btn.classList.toggle('active', this.compareMode);
         }
-        
+
         this.drawImageToCanvas();
+    }
+
+    toggleAnnotationMode() {
+        this.annotationMode = !this.annotationMode;
+        const btn = document.getElementById('toggle-annotation');
+        const tools = document.getElementById('annotation-tools');
+        if (btn) btn.classList.toggle('active', this.annotationMode);
+        if (tools) tools.classList.toggle('inactive', !this.annotationMode);
+
+        if (!this.annotationMode) {
+            this.applyAnnotationsToImage();
+            this.annotationTool = null;
+            document.querySelectorAll('.annotation-tool').forEach(b => b.classList.remove('active'));
+            if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
+            if (this.annotationInput) {
+                this.annotationInput.style.display = 'none';
+                this.annotationInput.value = '';
+            }
+        } else {
+            if (this.annotationHistory.length === 0) {
+                this.saveAnnotationState();
+            }
+        }
     }
     
     // 画布交互事件
     onCanvasWheel(e) {
+        if (this.annotationMode) return;
         e.preventDefault();
         
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -514,15 +556,16 @@ class ImageProcessor {
     }
     
     onCanvasMouseDown(e) {
+        if (this.annotationMode) return;
         this.isDragging = true;
         this.lastMouseX = e.clientX;
         this.lastMouseY = e.clientY;
         this.canvas.style.cursor = 'grabbing';
     }
-    
+
     onCanvasMouseMove(e) {
-        if (!this.isDragging) return;
-        
+        if (!this.isDragging || this.annotationMode) return;
+
         const deltaX = e.clientX - this.lastMouseX;
         const deltaY = e.clientY - this.lastMouseY;
         
@@ -536,20 +579,24 @@ class ImageProcessor {
     }
     
     onCanvasMouseUp() {
+        if (this.annotationMode) return;
         this.isDragging = false;
         this.canvas.style.cursor = 'grab';
     }
 
     onAnnotDown(e) {
+
         if (!this.annotationTool) return;
         const rect = this.annotationCanvas.getBoundingClientRect();
         this.startX = e.clientX - rect.left;
         this.startY = e.clientY - rect.top;
+
         this.isAnnotating = true;
 
         if (this.annotationTool === 'pencil') {
             this.annotationCtx.strokeStyle = this.annotationColor;
             this.annotationCtx.lineWidth = this.annotationSize;
+
             this.annotationCtx.beginPath();
             this.annotationCtx.moveTo(this.startX, this.startY);
         } else if (this.annotationTool === 'text') {
@@ -558,16 +605,19 @@ class ImageProcessor {
                 this.annotationCtx.fillStyle = this.annotationColor;
                 this.annotationCtx.font = `${this.annotationFont}px sans-serif`;
                 this.annotationCtx.fillText(text, this.startX, this.startY);
+
             }
             this.isAnnotating = false;
         }
     }
 
     onAnnotMove(e) {
+
         if (!this.isAnnotating || !this.annotationTool) return;
         const rect = this.annotationCanvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+
 
         if (this.annotationTool === 'pencil') {
             this.annotationCtx.lineTo(x, y);
@@ -576,11 +626,13 @@ class ImageProcessor {
     }
 
     onAnnotUp(e) {
+
         if (!this.isAnnotating || !this.annotationTool) return;
         this.isAnnotating = false;
         const rect = this.annotationCanvas.getBoundingClientRect();
         const endX = e.clientX - rect.left;
         const endY = e.clientY - rect.top;
+
 
         this.annotationCtx.strokeStyle = this.annotationColor;
         this.annotationCtx.lineWidth = this.annotationSize;
@@ -593,6 +645,7 @@ class ImageProcessor {
             this.annotationCtx.lineTo(endX, endY);
             this.annotationCtx.stroke();
         }
+
     }
 
     drawArrow(x1, y1, x2, y2) {
@@ -616,6 +669,7 @@ class ImageProcessor {
         if (this.annotationCtx && this.annotationCanvas) {
             this.annotationCtx.clearRect(0, 0, this.annotationCanvas.width, this.annotationCanvas.height);
         }
+
     }
     
     // 图像调整功能
@@ -1003,7 +1057,6 @@ class ImageProcessor {
         }
 
 
-        
         // 更新UI
         this.updateAdjustmentUI();
         
@@ -1014,6 +1067,7 @@ class ImageProcessor {
     }
 
     restoreOriginalImage() {
+
 
 
 
@@ -1062,7 +1116,9 @@ class ImageProcessor {
 
 
 
+
         }, 'image/png');
+
 
 
 
@@ -1163,6 +1219,84 @@ class ImageProcessor {
             };
             img.src = url;
         }, 'image/png');
+    }
+
+    saveAnnotationState() {
+        if (!this.annotationCanvas) return;
+        const data = this.annotationCtx.getImageData(0, 0, this.annotationCanvas.width, this.annotationCanvas.height);
+        this.annotationHistory = this.annotationHistory.slice(0, this.annotationHistoryIndex + 1);
+        this.annotationHistory.push(data);
+        this.annotationHistoryIndex++;
+    }
+
+    undoAnnotation() {
+        if (this.annotationHistoryIndex > 0) {
+            this.annotationHistoryIndex--;
+            const data = this.annotationHistory[this.annotationHistoryIndex];
+            this.annotationCtx.putImageData(data, 0, 0);
+        }
+    }
+
+    redoAnnotation() {
+        if (this.annotationHistoryIndex < this.annotationHistory.length - 1) {
+            this.annotationHistoryIndex++;
+            const data = this.annotationHistory[this.annotationHistoryIndex];
+            this.annotationCtx.putImageData(data, 0, 0);
+        }
+    }
+
+    applyAnnotationsToImage() {
+        if (!this.hasAnnotations || !this.annotationCanvas || !this.currentImage) return;
+
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = this.currentImage.width;
+        tempCanvas.height = this.currentImage.height;
+
+        if (this.processedImageData) {
+            const tmp = document.createElement('canvas');
+            tmp.width = this.processedImageData.width;
+            tmp.height = this.processedImageData.height;
+            tmp.getContext('2d').putImageData(this.processedImageData, 0, 0);
+            tempCtx.drawImage(tmp, 0, 0);
+        } else {
+            tempCtx.drawImage(this.currentImage, 0, 0);
+        }
+
+        tempCtx.drawImage(this.annotationCanvas, 0, 0, this.annotationCanvas.width, this.annotationCanvas.height, 0, 0, tempCanvas.width, tempCanvas.height);
+
+        if (this.processedImageData) {
+            this.processedImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            this.drawImageToCanvas();
+        } else {
+            tempCanvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const img = new Image();
+                img.onload = () => {
+                    this.currentImage = img;
+                    if (window.imageManager && window.imageManager.images && this.selectedThumbnailIndex >= 0) {
+                        const imageObj = window.imageManager.images[this.selectedThumbnailIndex];
+                        if (imageObj) {
+                            if (imageObj.url) URL.revokeObjectURL(imageObj.url);
+                            const file = new File([blob], imageObj.name, { type: 'image/png' });
+                            imageObj.file = file;
+                            imageObj.url = url;
+                            imageObj.size = blob.size;
+                            imageObj.width = img.width;
+                            imageObj.height = img.height;
+                            utils.createThumbnail(file, 200).then(t => { imageObj.thumbnail = t; window.imageManager.renderImages(); }).catch(err => console.warn('更新缩略图失败:', err));
+                        }
+                    }
+                    this.drawImageToCanvas();
+                };
+                img.src = url;
+            }, 'image/png');
+        }
+
+        this.clearAnnotations();
+        this.annotationHistory = [];
+        this.annotationHistoryIndex = -1;
+        this.hasAnnotations = false;
     }
     
     copyAdjustments() {
