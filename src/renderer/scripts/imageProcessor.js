@@ -16,6 +16,7 @@ class ImageProcessor {
         this.annotationCanvas = null;
         this.annotationCtx = null;
         this.annotationTool = null;
+        this.annotationMode = false;
         this.annotationColor = '#ff0000';
         this.annotationSize = 2;
         this.annotationFont = 20;
@@ -54,6 +55,8 @@ class ImageProcessor {
         this.initAnnotationCanvas();
         this.bindEvents();
         this.initCurveEditor();
+        const tools = document.getElementById('annotation-tools');
+        if (tools) tools.classList.add('inactive');
         console.log('图片处理器初始化完成');
     }
     
@@ -184,8 +187,14 @@ class ImageProcessor {
     }
 
     bindAnnotationEvents() {
+        const modeBtn = document.getElementById('toggle-annotation');
+        if (modeBtn) {
+            modeBtn.addEventListener('click', () => this.toggleAnnotationMode());
+        }
+
         document.querySelectorAll('.annotation-tool').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (!this.annotationMode) return;
                 if (btn.classList.contains('active')) {
                     btn.classList.remove('active');
                     this.annotationTool = null;
@@ -534,18 +543,36 @@ class ImageProcessor {
     
     toggleCompareMode() {
         this.compareMode = !this.compareMode;
-        
+
         const btn = document.getElementById('compare-mode');
         if (btn) {
             btn.classList.toggle('active', this.compareMode);
         }
-        
+
         this.drawImageToCanvas();
+    }
+
+    toggleAnnotationMode() {
+        this.annotationMode = !this.annotationMode;
+        const btn = document.getElementById('toggle-annotation');
+        const tools = document.getElementById('annotation-tools');
+        if (btn) btn.classList.toggle('active', this.annotationMode);
+        if (tools) tools.classList.toggle('inactive', !this.annotationMode);
+
+        if (!this.annotationMode) {
+            this.annotationTool = null;
+            document.querySelectorAll('.annotation-tool').forEach(b => b.classList.remove('active'));
+            if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
+            if (this.annotationInput) {
+                this.annotationInput.style.display = 'none';
+                this.annotationInput.value = '';
+            }
+        }
     }
     
     // 画布交互事件
     onCanvasWheel(e) {
-        if (this.annotationTool) return;
+        if (this.annotationMode) return;
         e.preventDefault();
         
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -559,7 +586,7 @@ class ImageProcessor {
     }
     
     onCanvasMouseDown(e) {
-        if (this.annotationTool) return;
+        if (this.annotationMode) return;
         this.isDragging = true;
         this.lastMouseX = e.clientX;
         this.lastMouseY = e.clientY;
@@ -567,7 +594,7 @@ class ImageProcessor {
     }
 
     onCanvasMouseMove(e) {
-        if (!this.isDragging || this.annotationTool) return;
+        if (!this.isDragging || this.annotationMode) return;
 
         const deltaX = e.clientX - this.lastMouseX;
         const deltaY = e.clientY - this.lastMouseY;
@@ -582,13 +609,13 @@ class ImageProcessor {
     }
     
     onCanvasMouseUp() {
-        if (this.annotationTool) return;
+        if (this.annotationMode) return;
         this.isDragging = false;
         this.canvas.style.cursor = 'grab';
     }
 
     onAnnotDown(e) {
-        if (!this.annotationTool) return;
+        if (!this.annotationMode || !this.annotationTool) return;
         const rect = this.annotationCanvas.getBoundingClientRect();
         const scale = this.annotationCanvas.width / rect.width;
         this.startX = (e.clientX - rect.left) * scale;
@@ -617,7 +644,7 @@ class ImageProcessor {
     }
 
     onAnnotMove(e) {
-        if (!this.isAnnotating || !this.annotationTool) return;
+        if (!this.annotationMode || !this.isAnnotating || !this.annotationTool) return;
         const rect = this.annotationCanvas.getBoundingClientRect();
         const scale = this.annotationCanvas.width / rect.width;
         const x = (e.clientX - rect.left) * scale;
@@ -630,7 +657,7 @@ class ImageProcessor {
     }
 
     onAnnotUp(e) {
-        if (!this.isAnnotating || !this.annotationTool) return;
+        if (!this.annotationMode || !this.isAnnotating || !this.annotationTool) return;
         this.isAnnotating = false;
         const rect = this.annotationCanvas.getBoundingClientRect();
         const scale = this.annotationCanvas.width / rect.width;
@@ -1060,7 +1087,10 @@ class ImageProcessor {
         this.clearAnnotations();
         if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
         this.annotationTool = null;
-        
+        this.annotationMode = false;
+        document.getElementById('toggle-annotation')?.classList.remove('active');
+        document.getElementById('annotation-tools')?.classList.add('inactive');
+
         // 更新UI
         this.updateAdjustmentUI();
         
@@ -1228,6 +1258,9 @@ class ImageProcessor {
                 this.clearAnnotations();
                 if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
                 this.annotationTool = null;
+                this.annotationMode = false;
+                document.getElementById('toggle-annotation')?.classList.remove('active');
+                document.getElementById('annotation-tools')?.classList.add('inactive');
                 this.drawImageToCanvas();
                 
                 console.log('调整已应用到当前图片');

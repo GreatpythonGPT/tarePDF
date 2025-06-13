@@ -884,6 +884,10 @@ html, body {
   margin-right: 8px;
 }
 
+.annotation-tools.inactive {
+  display: none;
+}
+
 .annotation-color,
 .annotation-size,
 .annotation-font {

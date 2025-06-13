@@ -60,3 +60,8 @@ This project is an Electron based image management and PDF generation tool desig
     - Prevented zooming and panning while an annotation tool is active to avoid conflicts.
     - Preserved drawings by stopping canvas resize during redraw and set the toolbar above the annotation layer.
     - Matched the thumbnail strip height to the sidebar footer using a dynamic calculation.
+
+12. **Annotation Mode Toggle (2025-06-13)**
+    - Introduced a dedicated "标注" toggle button in the preview toolbar.
+    - Annotation tools remain hidden until the toggle is active and panning/zooming are disabled while active.
+    - Resetting or applying adjustments now exits annotation mode and hides the tools.
