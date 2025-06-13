@@ -46,6 +46,9 @@ class App {
       
       // 设置初始状态
       this.setInitialState();
+
+      // 初始匹配缩略图高度
+      this.updateThumbnailHeight();
       
       // 标记为已初始化
       AppState.isInitialized = true;
@@ -256,13 +259,9 @@ class App {
         utils.showToast('请先添加图片', 'warning');
         return;
       }
-      
-      // 切换到参数设置页面
-      this.switchTab('settings');
-      
-      // 显示提示
-      utils.showToast('请在参数设置中配置PDF生成选项，然后点击生成PDF按钮', 'info');
-      
+
+      await window.pdfGenerator.generatePDF();
+
     } catch (error) {
       console.error('生成PDF失败:', error);
       utils.showToast('生成PDF失败: ' + error.message, 'error');
@@ -362,13 +361,28 @@ class App {
     
     statusBar.textContent = statusText;
   }
+
+  updateThumbnailHeight() {
+    const footer = document.querySelector('.sidebar-footer');
+    const strip = document.querySelector('.thumbnail-strip');
+    if (footer && strip) {
+      const h = footer.offsetHeight;
+      strip.style.setProperty('--thumbnail-height', `${h}px`);
+    }
+  }
   
   handleWindowResize() {
     // 重新计算布局
     if (AppState.currentTab === 'images') {
       window.imageManager.recalculateLayout();
     }
-    
+
+    if (this.imageProcessor) {
+      this.imageProcessor.resizeCanvas();
+    }
+
+    this.updateThumbnailHeight();
+
     // 更新状态栏
     this.updateStatusBar();
   }

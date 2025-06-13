@@ -186,6 +186,7 @@ class ImageManager {
       const thumbnail = await utils.createThumbnail(file, 200);
       
       // 创建图片对象
+      const originalUrl = URL.createObjectURL(file);
       const image = {
         id: utils.generateId(),
         name: file.name,
@@ -195,7 +196,9 @@ class ImageManager {
         height: dimensions.height,
         thumbnail: thumbnail,
         file: file,
-        url: URL.createObjectURL(file),
+        url: originalUrl,
+        originalFile: file,
+        originalUrl: originalUrl,
         watermarks: {
           imageA: true,
           imageB: true,
@@ -232,6 +235,7 @@ class ImageManager {
       const thumbnail = await utils.createThumbnail(file, 200);
       
       // 创建图片对象
+      const originalUrl = URL.createObjectURL(file);
       const image = {
         id: utils.generateId(),
         name: file.name,
@@ -241,7 +245,9 @@ class ImageManager {
         height: dimensions.height,
         thumbnail: thumbnail,
         file: file,
-        url: URL.createObjectURL(file),
+        url: originalUrl,
+        originalFile: file,
+        originalUrl: originalUrl,
         watermarks: {
           imageA: true,
           imageB: true,
