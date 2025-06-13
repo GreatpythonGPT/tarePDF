@@ -577,22 +577,25 @@
                             <div class="preview-image-wrapper">
                                 <canvas id="preview-canvas" class="preview-canvas"></canvas>
                                 <canvas id="annotation-canvas" class="annotation-canvas"></canvas>
-                                <input type="text" id="annotation-text-input" class="annotation-text-input" />
+
                             </div>
                             
                             <!-- 预览工具栏 -->
                             <div class="preview-toolbar">
-                                <button class="preview-tool-btn" id="toggle-annotation" title="标注模式">标注</button>
-                                <div class="annotation-tools" id="annotation-tools">
+
+                                <div class="annotation-tools">
+
                                     <button class="preview-tool-btn annotation-tool" data-tool="pencil" title="手绘线条">✎</button>
                                     <button class="preview-tool-btn annotation-tool" data-tool="arrow" title="箭头标注">➤</button>
                                     <button class="preview-tool-btn annotation-tool" data-tool="rect" title="矩形标注">▢</button>
                                     <button class="preview-tool-btn annotation-tool" data-tool="text" title="文本标注">T</button>
-                                    <input type="number" id="annotation-font" value="20" min="8" max="72" class="annotation-font">
+
+
+
                                     <input type="color" id="annotation-color" value="#ff0000" class="annotation-color">
                                     <input type="number" id="annotation-size" value="2" min="1" max="20" class="annotation-size">
-                                    <button class="preview-tool-btn" id="annotation-undo" title="撤销">↶</button>
-                                    <button class="preview-tool-btn" id="annotation-redo" title="重做">↷</button>
+                                    <input type="number" id="annotation-font" value="20" min="8" max="72" class="annotation-font">
+
                                 </div>
                                 <button class="preview-tool-btn" id="zoom-fit" title="适合窗口">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">

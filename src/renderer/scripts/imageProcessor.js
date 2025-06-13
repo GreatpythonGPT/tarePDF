@@ -16,19 +16,14 @@ class ImageProcessor {
         this.annotationCanvas = null;
         this.annotationCtx = null;
         this.annotationTool = null;
-        this.annotationMode = false;
+
         this.annotationColor = '#ff0000';
         this.annotationSize = 2;
         this.annotationFont = 20;
-        this.annotationInput = null;
-        this.textX = 0;
-        this.textY = 0;
         this.isAnnotating = false;
         this.startX = 0;
         this.startY = 0;
-        this.annotationHistory = [];
-        this.annotationHistoryIndex = -1;
-        this.hasAnnotations = false;
+
         
         // 调整参数
         this.adjustments = {
@@ -56,7 +51,7 @@ class ImageProcessor {
     init() {
         this.initCanvas();
         this.initAnnotationCanvas();
-        this.bindEvents();
+
         this.initCurveEditor();
         const tools = document.getElementById('annotation-tools');
         if (tools) tools.classList.add('inactive');
@@ -190,30 +185,16 @@ class ImageProcessor {
     }
 
     bindAnnotationEvents() {
-        const modeBtn = document.getElementById('toggle-annotation');
-        if (modeBtn) {
-            modeBtn.addEventListener('click', () => this.toggleAnnotationMode());
-        }
-
-        const undoBtn = document.getElementById('annotation-undo');
-        if (undoBtn) undoBtn.addEventListener('click', () => this.undoAnnotation());
-
-        const redoBtn = document.getElementById('annotation-redo');
-        if (redoBtn) redoBtn.addEventListener('click', () => this.redoAnnotation());
 
         document.querySelectorAll('.annotation-tool').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (!this.annotationMode) return;
-                if (btn.classList.contains('active')) {
-                    btn.classList.remove('active');
-                    this.annotationTool = null;
-                    if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
-                } else {
-                    document.querySelectorAll('.annotation-tool').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    this.annotationTool = btn.dataset.tool;
-                    if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'auto';
-                }
+
+                document.querySelectorAll('.annotation-tool').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.annotationTool = btn.dataset.tool;
+                if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'auto';
+
+
             });
         });
 
@@ -226,34 +207,6 @@ class ImageProcessor {
         const fontInput = document.getElementById('annotation-font');
         if (fontInput) fontInput.addEventListener('change', e => this.annotationFont = parseInt(e.target.value) || 20);
 
-        if (this.annotationInput) {
-            this.annotationInput.addEventListener('keydown', e => {
-                if (e.key === 'Enter') {
-                    const text = this.annotationInput.value.trim();
-                    if (text) {
-                        this.annotationCtx.fillStyle = this.annotationColor;
-                        this.annotationCtx.font = `${this.annotationFont}px sans-serif`;
-                        this.annotationCtx.fillText(text, this.textX, this.textY);
-                        this.saveAnnotationState();
-                        this.hasAnnotations = true;
-                    }
-                    this.annotationInput.value = '';
-                    this.annotationInput.style.display = 'none';
-                }
-            });
-            this.annotationInput.addEventListener('blur', () => {
-                const text = this.annotationInput.value.trim();
-                if (text) {
-                    this.annotationCtx.fillStyle = this.annotationColor;
-                    this.annotationCtx.font = `${this.annotationFont}px sans-serif`;
-                    this.annotationCtx.fillText(text, this.textX, this.textY);
-                    this.saveAnnotationState();
-                    this.hasAnnotations = true;
-                }
-                this.annotationInput.style.display = 'none';
-                this.annotationInput.value = '';
-            });
-        }
 
         if (this.annotationCanvas) {
             this.annotationCanvas.addEventListener('mousedown', e => this.onAnnotDown(e));
@@ -278,12 +231,7 @@ class ImageProcessor {
             this.annotationCanvas = canvas;
             this.annotationCtx = canvas.getContext('2d');
             this.resizeCanvas();
-            this.saveAnnotationState();
-        }
 
-        const input = document.getElementById('annotation-text-input');
-        if (input) {
-            this.annotationInput = input;
         }
     }
     
@@ -390,14 +338,6 @@ class ImageProcessor {
                 this.saveOriginalImageData(img);
             }
 
-            this.clearAnnotations();
-            if (this.annotationCanvas) {
-                this.annotationCanvas.style.pointerEvents = 'none';
-                // 尺寸与预览画布保持一致，避免坐标偏移
-                this.annotationCanvas.width = this.canvas.width;
-                this.annotationCanvas.height = this.canvas.height;
-                this.saveAnnotationState();
-            }
 
             // 重置调整参数
             this.resetAdjustments(false);
@@ -511,7 +451,7 @@ class ImageProcessor {
             this.canvas.height = container.clientHeight;
 
             if (this.annotationCanvas) {
-                // 始终使用容器尺寸，避免内部坐标与显示尺寸不一致
+
                 this.annotationCanvas.width = container.clientWidth;
                 this.annotationCanvas.height = container.clientHeight;
             }
@@ -645,40 +585,39 @@ class ImageProcessor {
     }
 
     onAnnotDown(e) {
-        if (!this.annotationMode || !this.annotationTool) return;
+
+        if (!this.annotationTool) return;
         const rect = this.annotationCanvas.getBoundingClientRect();
-        const scale = this.annotationCanvas.width / rect.width;
-        this.startX = (e.clientX - rect.left) * scale;
-        this.startY = (e.clientY - rect.top) * scale;
+        this.startX = e.clientX - rect.left;
+        this.startY = e.clientY - rect.top;
+
         this.isAnnotating = true;
 
         if (this.annotationTool === 'pencil') {
             this.annotationCtx.strokeStyle = this.annotationColor;
             this.annotationCtx.lineWidth = this.annotationSize;
-            this.annotationCtx.lineCap = 'round';
-            this.annotationCtx.lineJoin = 'round';
+
             this.annotationCtx.beginPath();
             this.annotationCtx.moveTo(this.startX, this.startY);
         } else if (this.annotationTool === 'text') {
-            if (this.annotationInput) {
-                const rectCanvas = this.annotationCanvas.getBoundingClientRect();
-                this.textX = this.startX;
-                this.textY = this.startY;
-                this.annotationInput.style.left = `${this.startX / (this.annotationCanvas.width / rectCanvas.width)}px`;
-                this.annotationInput.style.top = `${this.startY / (this.annotationCanvas.height / rectCanvas.height)}px`;
-                this.annotationInput.style.display = 'block';
-                this.annotationInput.focus();
+            const text = prompt('输入文本');
+            if (text) {
+                this.annotationCtx.fillStyle = this.annotationColor;
+                this.annotationCtx.font = `${this.annotationFont}px sans-serif`;
+                this.annotationCtx.fillText(text, this.startX, this.startY);
+
             }
             this.isAnnotating = false;
         }
     }
 
     onAnnotMove(e) {
-        if (!this.annotationMode || !this.isAnnotating || !this.annotationTool) return;
+
+        if (!this.isAnnotating || !this.annotationTool) return;
         const rect = this.annotationCanvas.getBoundingClientRect();
-        const scale = this.annotationCanvas.width / rect.width;
-        const x = (e.clientX - rect.left) * scale;
-        const y = (e.clientY - rect.top) * scale;
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
 
         if (this.annotationTool === 'pencil') {
             this.annotationCtx.lineTo(x, y);
@@ -687,12 +626,13 @@ class ImageProcessor {
     }
 
     onAnnotUp(e) {
-        if (!this.annotationMode || !this.isAnnotating || !this.annotationTool) return;
+
+        if (!this.isAnnotating || !this.annotationTool) return;
         this.isAnnotating = false;
         const rect = this.annotationCanvas.getBoundingClientRect();
-        const scale = this.annotationCanvas.width / rect.width;
-        const endX = (e.clientX - rect.left) * scale;
-        const endY = (e.clientY - rect.top) * scale;
+        const endX = e.clientX - rect.left;
+        const endY = e.clientY - rect.top;
+
 
         this.annotationCtx.strokeStyle = this.annotationColor;
         this.annotationCtx.lineWidth = this.annotationSize;
@@ -706,8 +646,6 @@ class ImageProcessor {
             this.annotationCtx.stroke();
         }
 
-        this.saveAnnotationState();
-        this.hasAnnotations = true;
     }
 
     drawArrow(x1, y1, x2, y2) {
@@ -731,12 +669,7 @@ class ImageProcessor {
         if (this.annotationCtx && this.annotationCanvas) {
             this.annotationCtx.clearRect(0, 0, this.annotationCanvas.width, this.annotationCanvas.height);
         }
-        this.annotationHistory = [];
-        this.annotationHistoryIndex = -1;
-        this.hasAnnotations = false;
-        if (this.annotationCanvas) {
-            this.saveAnnotationState();
-        }
+
     }
     
     // 图像调整功能
@@ -1123,12 +1056,6 @@ class ImageProcessor {
             this.processedImageData = null;
         }
 
-        this.clearAnnotations();
-        if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
-        this.annotationTool = null;
-        this.annotationMode = false;
-        document.getElementById('toggle-annotation')?.classList.remove('active');
-        document.getElementById('annotation-tools')?.classList.add('inactive');
 
         // 更新UI
         this.updateAdjustmentUI();
@@ -1140,73 +1067,61 @@ class ImageProcessor {
     }
 
     restoreOriginalImage() {
-        if (this.selectedThumbnailIndex === -1) return;
 
-        const imageObj = window.imageManager?.images?.[this.selectedThumbnailIndex];
-        if (!imageObj) return;
 
-        const originalFile = imageObj.originalFile;
-        if (!originalFile && !this.originalImageData) return;
 
-        if (originalFile) {
-            const url = URL.createObjectURL(originalFile);
+
+        if (!this.originalImageData || this.selectedThumbnailIndex === -1) return;
+
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = this.originalImageData.width;
+        tempCanvas.height = this.originalImageData.height;
+        tempCtx.putImageData(this.originalImageData, 0, 0);
+
+        tempCanvas.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
             const img = new Image();
             img.onload = () => {
                 this.currentImage = img;
-                this.saveOriginalImageData(img);
 
-                if (imageObj.url) {
-                    URL.revokeObjectURL(imageObj.url);
+                if (window.imageManager && window.imageManager.images && this.selectedThumbnailIndex < window.imageManager.images.length) {
+                    const imageObj = window.imageManager.images[this.selectedThumbnailIndex];
+                    if (imageObj) {
+                        if (imageObj.url) {
+                            URL.revokeObjectURL(imageObj.url);
+                        }
+
+                        const file = new File([blob], imageObj.name || 'image.png', { type: 'image/png' });
+                        imageObj.file = file;
+                        imageObj.url = url;
+                        imageObj.size = blob.size;
+                        imageObj.width = this.originalImageData.width;
+                        imageObj.height = this.originalImageData.height;
+
+                        utils.createThumbnail(file, 200).then(thumbnail => {
+                            imageObj.thumbnail = thumbnail;
+                            window.imageManager.renderImages();
+                        }).catch(err => console.warn('更新缩略图失败:', err));
+                    }
                 }
 
-                imageObj.file = originalFile;
-                imageObj.url = url;
-                imageObj.size = originalFile.size;
-                imageObj.width = img.width;
-                imageObj.height = img.height;
 
-                utils.createThumbnail(originalFile, 200).then(thumbnail => {
-                    imageObj.thumbnail = thumbnail;
-                    window.imageManager.renderImages();
-                }).catch(err => console.warn('更新缩略图失败:', err));
+
 
                 this.processedImageData = null;
                 this.drawImageToCanvas();
             };
             img.src = url;
-        } else {
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCanvas.width = this.originalImageData.width;
-            tempCanvas.height = this.originalImageData.height;
-            tempCtx.putImageData(this.originalImageData, 0, 0);
 
-            tempCanvas.toBlob((blob) => {
-                const url = URL.createObjectURL(blob);
-                const img = new Image();
-                img.onload = () => {
-                    this.currentImage = img;
-                    if (imageObj.url) {
-                        URL.revokeObjectURL(imageObj.url);
-                    }
-                    const file = new File([blob], imageObj.name || 'image.png', { type: 'image/png' });
-                    imageObj.file = file;
-                    imageObj.url = url;
-                    imageObj.size = blob.size;
-                    imageObj.width = this.originalImageData.width;
-                    imageObj.height = this.originalImageData.height;
 
-                    utils.createThumbnail(file, 200).then(thumbnail => {
-                        imageObj.thumbnail = thumbnail;
-                        window.imageManager.renderImages();
-                    }).catch(err => console.warn('更新缩略图失败:', err));
 
-                    this.processedImageData = null;
-                    this.drawImageToCanvas();
-                };
-                img.src = url;
-            }, 'image/png');
-        }
+
+        }, 'image/png');
+
+
+
+
     }
     
     updateAdjustmentUI() {
@@ -1296,10 +1211,7 @@ class ImageProcessor {
                 // 清除标注并重新绘制
                 this.clearAnnotations();
                 if (this.annotationCanvas) this.annotationCanvas.style.pointerEvents = 'none';
-                this.annotationTool = null;
-                this.annotationMode = false;
-                document.getElementById('toggle-annotation')?.classList.remove('active');
-                document.getElementById('annotation-tools')?.classList.add('inactive');
+
                 this.drawImageToCanvas();
                 
                 console.log('调整已应用到当前图片');
