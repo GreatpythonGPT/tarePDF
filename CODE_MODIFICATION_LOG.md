@@ -49,3 +49,8 @@ This project is an Electron based image management and PDF generation tool desig
 9. **Annotation Alignment (2025-06-12)**
    - Annotation canvas now follows zoom and pan by applying the same transform used for the image preview.
    - Mouse coordinates are scaled by the zoom level so drawings map correctly to the underlying picture.
+
+10. **Annotation Accuracy and Layout Fixes (2025-06-13)**
+    - Set the annotation canvas size to match the preview container instead of the original image to keep screen and canvas coordinates in sync.
+    - Calculated mouse positions based on the actual canvas-to-screen ratio to prevent drifting annotations.
+    - Changed the processing layout to use full available height and disabled overflow on the processing tab to avoid nested scrollbars.

@@ -212,6 +212,11 @@ html, body {
   display: flex;
 }
 
+/* 图片处理页面避免嵌套滚动 */
+#processing-tab.tab-content {
+  overflow: hidden;
+}
+
 /* 标签页头部 - Fluent Design */
 .tab-header {
   display: flex;
@@ -786,7 +791,7 @@ html, body {
 .processing-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background: #1a1a1a;
   position: relative;
 }

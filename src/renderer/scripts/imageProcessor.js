@@ -333,8 +333,9 @@ class ImageProcessor {
             this.clearAnnotations();
             if (this.annotationCanvas) {
                 this.annotationCanvas.style.pointerEvents = 'none';
-                this.annotationCanvas.width = img.width;
-                this.annotationCanvas.height = img.height;
+                // 尺寸与预览画布保持一致，避免坐标偏移
+                this.annotationCanvas.width = this.canvas.width;
+                this.annotationCanvas.height = this.canvas.height;
             }
 
             // 重置调整参数
@@ -450,13 +451,9 @@ class ImageProcessor {
             this.canvas.height = container.clientHeight;
 
             if (this.annotationCanvas) {
-                if (this.currentImage) {
-                    this.annotationCanvas.width = this.currentImage.width;
-                    this.annotationCanvas.height = this.currentImage.height;
-                } else {
-                    this.annotationCanvas.width = container.clientWidth;
-                    this.annotationCanvas.height = container.clientHeight;
-                }
+                // 始终使用容器尺寸，避免内部坐标与显示尺寸不一致
+                this.annotationCanvas.width = container.clientWidth;
+                this.annotationCanvas.height = container.clientHeight;
             }
         }
     }
@@ -564,8 +561,9 @@ class ImageProcessor {
     onAnnotDown(e) {
         if (!this.annotationTool) return;
         const rect = this.annotationCanvas.getBoundingClientRect();
-        this.startX = (e.clientX - rect.left) / this.zoomLevel;
-        this.startY = (e.clientY - rect.top) / this.zoomLevel;
+        const scale = this.annotationCanvas.width / rect.width;
+        this.startX = (e.clientX - rect.left) * scale;
+        this.startY = (e.clientY - rect.top) * scale;
         this.isAnnotating = true;
 
         if (this.annotationTool === 'pencil') {
@@ -587,8 +585,9 @@ class ImageProcessor {
     onAnnotMove(e) {
         if (!this.isAnnotating || !this.annotationTool) return;
         const rect = this.annotationCanvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / this.zoomLevel;
-        const y = (e.clientY - rect.top) / this.zoomLevel;
+        const scale = this.annotationCanvas.width / rect.width;
+        const x = (e.clientX - rect.left) * scale;
+        const y = (e.clientY - rect.top) * scale;
 
         if (this.annotationTool === 'pencil') {
             this.annotationCtx.lineTo(x, y);
@@ -600,8 +599,9 @@ class ImageProcessor {
         if (!this.isAnnotating || !this.annotationTool) return;
         this.isAnnotating = false;
         const rect = this.annotationCanvas.getBoundingClientRect();
-        const endX = (e.clientX - rect.left) / this.zoomLevel;
-        const endY = (e.clientY - rect.top) / this.zoomLevel;
+        const scale = this.annotationCanvas.width / rect.width;
+        const endX = (e.clientX - rect.left) * scale;
+        const endY = (e.clientY - rect.top) * scale;
 
         this.annotationCtx.strokeStyle = this.annotationColor;
         this.annotationCtx.lineWidth = this.annotationSize;
