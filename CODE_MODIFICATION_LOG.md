@@ -54,3 +54,9 @@ This project is an Electron based image management and PDF generation tool desig
     - Set the annotation canvas size to match the preview container instead of the original image to keep screen and canvas coordinates in sync.
     - Calculated mouse positions based on the actual canvas-to-screen ratio to prevent drifting annotations.
     - Changed the processing layout to use full available height and disabled overflow on the processing tab to avoid nested scrollbars.
+
+11. **Annotation Interaction Updates (2025-06-13)**
+    - Added an in-canvas text input instead of the unsupported `prompt()` call.
+    - Prevented zooming and panning while an annotation tool is active to avoid conflicts.
+    - Preserved drawings by stopping canvas resize during redraw and set the toolbar above the annotation layer.
+    - Matched the thumbnail strip height to the sidebar footer using a dynamic calculation.

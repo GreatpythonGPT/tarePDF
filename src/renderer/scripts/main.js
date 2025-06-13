@@ -46,6 +46,9 @@ class App {
       
       // 设置初始状态
       this.setInitialState();
+
+      // 初始匹配缩略图高度
+      this.updateThumbnailHeight();
       
       // 标记为已初始化
       AppState.isInitialized = true;
@@ -358,13 +361,28 @@ class App {
     
     statusBar.textContent = statusText;
   }
+
+  updateThumbnailHeight() {
+    const footer = document.querySelector('.sidebar-footer');
+    const strip = document.querySelector('.thumbnail-strip');
+    if (footer && strip) {
+      const h = footer.offsetHeight;
+      strip.style.setProperty('--thumbnail-height', `${h}px`);
+    }
+  }
   
   handleWindowResize() {
     // 重新计算布局
     if (AppState.currentTab === 'images') {
       window.imageManager.recalculateLayout();
     }
-    
+
+    if (this.imageProcessor) {
+      this.imageProcessor.resizeCanvas();
+    }
+
+    this.updateThumbnailHeight();
+
     // 更新状态栏
     this.updateStatusBar();
   }

@@ -19,6 +19,9 @@ class ImageProcessor {
         this.annotationColor = '#ff0000';
         this.annotationSize = 2;
         this.annotationFont = 20;
+        this.annotationInput = null;
+        this.textX = 0;
+        this.textY = 0;
         this.isAnnotating = false;
         this.startX = 0;
         this.startY = 0;
@@ -205,6 +208,25 @@ class ImageProcessor {
         const fontInput = document.getElementById('annotation-font');
         if (fontInput) fontInput.addEventListener('change', e => this.annotationFont = parseInt(e.target.value) || 20);
 
+        if (this.annotationInput) {
+            this.annotationInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    const text = this.annotationInput.value.trim();
+                    if (text) {
+                        this.annotationCtx.fillStyle = this.annotationColor;
+                        this.annotationCtx.font = `${this.annotationFont}px sans-serif`;
+                        this.annotationCtx.fillText(text, this.textX, this.textY);
+                    }
+                    this.annotationInput.value = '';
+                    this.annotationInput.style.display = 'none';
+                }
+            });
+            this.annotationInput.addEventListener('blur', () => {
+                this.annotationInput.style.display = 'none';
+                this.annotationInput.value = '';
+            });
+        }
+
         if (this.annotationCanvas) {
             this.annotationCanvas.addEventListener('mousedown', e => this.onAnnotDown(e));
             this.annotationCanvas.addEventListener('mousemove', e => this.onAnnotMove(e));
@@ -228,6 +250,11 @@ class ImageProcessor {
             this.annotationCanvas = canvas;
             this.annotationCtx = canvas.getContext('2d');
             this.resizeCanvas();
+        }
+
+        const input = document.getElementById('annotation-text-input');
+        if (input) {
+            this.annotationInput = input;
         }
     }
     
@@ -371,8 +398,7 @@ class ImageProcessor {
     drawImageToCanvas() {
         if (!this.currentImage || !this.canvas) return;
         
-        // 调整画布大小
-        this.resizeCanvas();
+
         
         // 清空画布
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -519,6 +545,7 @@ class ImageProcessor {
     
     // 画布交互事件
     onCanvasWheel(e) {
+        if (this.annotationTool) return;
         e.preventDefault();
         
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -532,15 +559,16 @@ class ImageProcessor {
     }
     
     onCanvasMouseDown(e) {
+        if (this.annotationTool) return;
         this.isDragging = true;
         this.lastMouseX = e.clientX;
         this.lastMouseY = e.clientY;
         this.canvas.style.cursor = 'grabbing';
     }
-    
+
     onCanvasMouseMove(e) {
-        if (!this.isDragging) return;
-        
+        if (!this.isDragging || this.annotationTool) return;
+
         const deltaX = e.clientX - this.lastMouseX;
         const deltaY = e.clientY - this.lastMouseY;
         
@@ -554,6 +582,7 @@ class ImageProcessor {
     }
     
     onCanvasMouseUp() {
+        if (this.annotationTool) return;
         this.isDragging = false;
         this.canvas.style.cursor = 'grab';
     }
@@ -569,14 +598,19 @@ class ImageProcessor {
         if (this.annotationTool === 'pencil') {
             this.annotationCtx.strokeStyle = this.annotationColor;
             this.annotationCtx.lineWidth = this.annotationSize;
+            this.annotationCtx.lineCap = 'round';
+            this.annotationCtx.lineJoin = 'round';
             this.annotationCtx.beginPath();
             this.annotationCtx.moveTo(this.startX, this.startY);
         } else if (this.annotationTool === 'text') {
-            const text = prompt('输入文本');
-            if (text) {
-                this.annotationCtx.fillStyle = this.annotationColor;
-                this.annotationCtx.font = `${this.annotationFont}px sans-serif`;
-                this.annotationCtx.fillText(text, this.startX, this.startY);
+            if (this.annotationInput) {
+                const rectCanvas = this.annotationCanvas.getBoundingClientRect();
+                this.textX = this.startX;
+                this.textY = this.startY;
+                this.annotationInput.style.left = `${this.startX / (this.annotationCanvas.width / rectCanvas.width)}px`;
+                this.annotationInput.style.top = `${this.startY / (this.annotationCanvas.height / rectCanvas.height)}px`;
+                this.annotationInput.style.display = 'block';
+                this.annotationInput.focus();
             }
             this.isAnnotating = false;
         }
