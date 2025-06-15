@@ -398,11 +398,6 @@ class ImageProcessor {
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         }
         
-        // 显示空状态
-        const emptyState = document.querySelector('.preview-empty-state');
-        if (emptyState) {
-            emptyState.style.display = 'flex';
-        }
     }
     
     // 缩放和平移功能
