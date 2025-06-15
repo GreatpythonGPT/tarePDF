@@ -212,6 +212,11 @@ html, body {
   display: flex;
 }
 
+/* 图片处理页面避免嵌套滚动 */
+#processing-tab.tab-content {
+  overflow: hidden;
+}
+
 /* 标签页头部 - Fluent Design */
 .tab-header {
   display: flex;
@@ -403,7 +408,7 @@ html, body {
 
 /* 表单样式 - Fluent Design */
 .form-group {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .form-group:last-child {
@@ -521,7 +526,7 @@ html, body {
 .radio-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 8px;
 }
 
 .radio-item {
@@ -607,7 +612,7 @@ html, body {
 /* 缩放选项 */
 .scale-options {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .scale-item {
@@ -644,7 +649,7 @@ html, body {
 .preset-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 8px;
 }
 
 .preset-item {
@@ -786,7 +791,7 @@ html, body {
 .processing-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background: #1a1a1a;
   position: relative;
 }
@@ -827,27 +832,9 @@ html, body {
   transition: transform 0.2s ease;
 }
 
+
 .preview-canvas:active {
   cursor: grabbing;
-}
-
-.preview-empty-state {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  color: #888;
-  font-size: 16px;
-  z-index: 10;
-}
-
-.preview-empty-state svg {
-  opacity: 0.5;
 }
 
 /* 预览工具栏 */
@@ -864,7 +851,9 @@ html, body {
   padding: 8px 16px;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 3;
 }
+
 
 .preview-tool-btn {
   width: 32px;
@@ -902,7 +891,7 @@ html, body {
 
 /* 缩略图条 (25%高度) */
 .thumbnail-strip {
-  flex: 0 0 25%;
+  flex: 0 0 var(--thumbnail-height, 25%);
   background: #1e1e1e;
   border-bottom: 1px solid #404040;
   position: relative;
