@@ -87,3 +87,7 @@ This project is an Electron based image management and PDF generation tool desig
 17. **Batch Adjustment Removal and Sharpening Update (2025-06-15)**
     - Removed copy/paste/apply controls for batch adjustments from the image adjustment panel and deleted related code and styles.
     - Replaced the simplistic sharpening method with an unsharp mask using a Gaussian blur for more realistic results.
+
+18. **Sharpen Effect Adjustment (2025-06-15)**
+    - Increased the unsharp mask strength so the slider visibly changes the image.
+

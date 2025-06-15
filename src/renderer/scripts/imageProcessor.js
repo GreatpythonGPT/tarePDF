@@ -586,7 +586,8 @@ class ImageProcessor {
         const data = imageData.data;
         const width = imageData.width;
         const height = imageData.height;
-        const strength = sharpness / 100;
+        // 提高强度，让滑块的变化更加明显
+        const strength = sharpness / 20;
 
         // 先生成一个简单的高斯模糊版本
         const blurred = new Uint8ClampedArray(data.length);
