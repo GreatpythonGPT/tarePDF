@@ -29,8 +29,6 @@ class ImageProcessor {
         // 当前曲线通道
         this.currentCurveChannel = 'rgb';
         
-        // 复制的调整参数
-        this.copiedAdjustments = null;
         
         this.init();
     }
@@ -61,10 +59,6 @@ class ImageProcessor {
         // 曲线编辑器事件
         this.bindCurveEvents();
         
-        // 批量操作事件
-        document.getElementById('copy-adjustments')?.addEventListener('click', () => this.copyAdjustments());
-        document.getElementById('paste-adjustments')?.addEventListener('click', () => this.pasteAdjustments());
-        document.getElementById('apply-to-selected')?.addEventListener('click', () => this.applyToSelected());
         
         // 画布事件
         this.bindCanvasEvents();
@@ -588,33 +582,48 @@ class ImageProcessor {
     
     applySharpness(imageData, sharpness) {
         if (sharpness === 0) return imageData;
-        
-        // 简化的锐化算法
+
         const data = imageData.data;
         const width = imageData.width;
         const height = imageData.height;
-        const factor = sharpness / 100;
-        
-        const newData = new Uint8ClampedArray(data);
-        
-        for (let y = 1; y < height - 1; y++) {
-            for (let x = 1; x < width - 1; x++) {
-                const idx = (y * width + x) * 4;
-                
+        const strength = sharpness / 100;
+
+        // 先生成一个简单的高斯模糊版本
+        const blurred = new Uint8ClampedArray(data.length);
+        const kernel = [1, 2, 1, 2, 4, 2, 1, 2, 1];
+        const getIndex = (x, y) => (y * width + x) * 4;
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
                 for (let c = 0; c < 3; c++) {
-                    const current = data[idx + c];
-                    const top = data[((y - 1) * width + x) * 4 + c];
-                    const bottom = data[((y + 1) * width + x) * 4 + c];
-                    const left = data[(y * width + (x - 1)) * 4 + c];
-                    const right = data[(y * width + (x + 1)) * 4 + c];
-                    
-                    const edge = current * 5 - top - bottom - left - right;
-                    newData[idx + c] = Math.max(0, Math.min(255, current + edge * factor));
+                    let sum = 0;
+                    let k = 0;
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            const ix = Math.min(width - 1, Math.max(0, x + kx));
+                            const iy = Math.min(height - 1, Math.max(0, y + ky));
+                            sum += data[getIndex(ix, iy) + c] * kernel[k];
+                            k++;
+                        }
+                    }
+                    blurred[getIndex(x, y) + c] = sum / 16;
                 }
+                blurred[getIndex(x, y) + 3] = data[getIndex(x, y) + 3];
             }
         }
-        
-        return new ImageData(newData, width, height);
+
+        const result = new Uint8ClampedArray(data.length);
+        for (let i = 0; i < data.length; i += 4) {
+            for (let c = 0; c < 3; c++) {
+                const orig = data[i + c];
+                const blur = blurred[i + c];
+                const val = orig + strength * (orig - blur);
+                result[i + c] = Math.max(0, Math.min(255, val));
+            }
+            result[i + 3] = data[i + 3];
+        }
+
+        return new ImageData(result, width, height);
     }
     
     applyCurves(imageData) {
@@ -968,35 +977,6 @@ class ImageProcessor {
         }, 'image/png');
     }
     
-    copyAdjustments() {
-        this.copiedAdjustments = JSON.parse(JSON.stringify(this.adjustments));
-        console.log('已复制调整参数');
-    }
-    
-    pasteAdjustments() {
-        if (!this.copiedAdjustments) {
-            alert('没有可粘贴的调整参数');
-            return;
-        }
-        
-        this.adjustments = JSON.parse(JSON.stringify(this.copiedAdjustments));
-        this.updateAdjustmentUI();
-        this.drawCurve();
-        this.applyAdjustmentsToPreview();
-        
-        console.log('已粘贴调整参数');
-    }
-    
-    applyToSelected() {
-        if (!this.copiedAdjustments) {
-            alert('没有可应用的调整参数');
-            return;
-        }
-        
-        // 这里应该将调整应用到所有选中的图片
-        console.log('批量应用调整参数:', this.copiedAdjustments);
-        alert('调整已应用到选中的图片');
-    }
 }
 
 // 导出类

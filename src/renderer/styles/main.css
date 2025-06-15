@@ -1182,17 +1182,6 @@ html, body {
   justify-content: center;
 }
 
-/* 批量操作 */
-.batch-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.batch-actions .btn {
-  width: 100%;
-  justify-content: center;
-}
 
 /* 按钮尺寸变体 */
 .btn-xs {

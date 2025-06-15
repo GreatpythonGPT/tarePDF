@@ -83,3 +83,7 @@ This project is an Electron based image management and PDF generation tool desig
 16. **Original URL Handling (2025-06-15)**
     - Created separate object URLs for each image so the original file URL is preserved after applying adjustments.
     - Avoided revoking the original URL when updating images in `applyAdjustments()`.
+
+17. **Batch Adjustment Removal and Sharpening Update (2025-06-15)**
+    - Removed copy/paste/apply controls for batch adjustments from the image adjustment panel and deleted related code and styles.
+    - Replaced the simplistic sharpening method with an unsharp mask using a Gaussian blur for more realistic results.
