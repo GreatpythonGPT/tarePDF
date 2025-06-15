@@ -79,3 +79,7 @@ This project is an Electron based image management and PDF generation tool desig
 15. **Image Reset Fix (2025-06-15)**
     - Added `restoreOriginalImage()` in `imageProcessor.js` to reload the unedited file from `imageManager`.
     - Reset button now calls this method before clearing adjustments so applied edits can be undone.
+
+16. **Original URL Handling (2025-06-15)**
+    - Created separate object URLs for each image so the original file URL is preserved after applying adjustments.
+    - Avoided revoking the original URL when updating images in `applyAdjustments()`.

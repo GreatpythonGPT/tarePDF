@@ -924,8 +924,8 @@ class ImageProcessor {
                 if (window.imageManager && window.imageManager.images && this.selectedThumbnailIndex < window.imageManager.images.length) {
                     const imageObj = window.imageManager.images[this.selectedThumbnailIndex];
                     if (imageObj) {
-                        // 清理旧的URL对象，避免内存泄漏
-                        if (imageObj.url) {
+                        // 清理旧的URL对象，避免内存泄漏，但保留 originalUrl
+                        if (imageObj.url && imageObj.url !== imageObj.originalUrl) {
                             URL.revokeObjectURL(imageObj.url);
                         }
                         

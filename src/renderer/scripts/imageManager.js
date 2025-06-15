@@ -187,6 +187,7 @@ class ImageManager {
       
       // 创建图片对象
       const originalUrl = URL.createObjectURL(file);
+      const url = URL.createObjectURL(file);
       const image = {
         id: utils.generateId(),
         name: file.name,
@@ -196,7 +197,7 @@ class ImageManager {
         height: dimensions.height,
         thumbnail: thumbnail,
         file: file,
-        url: originalUrl,
+        url: url,
         originalFile: file,
         originalUrl: originalUrl,
         watermarks: {
@@ -236,6 +237,7 @@ class ImageManager {
       
       // 创建图片对象
       const originalUrl = URL.createObjectURL(file);
+      const url = URL.createObjectURL(file);
       const image = {
         id: utils.generateId(),
         name: file.name,
@@ -245,7 +247,7 @@ class ImageManager {
         height: dimensions.height,
         thumbnail: thumbnail,
         file: file,
-        url: originalUrl,
+        url: url,
         originalFile: file,
         originalUrl: originalUrl,
         watermarks: {
