@@ -75,3 +75,7 @@ This project is an Electron based image management and PDF generation tool desig
 14. **Remove Annotation Features (2025-06-15)**
     - Removed the annotation canvas, toolbar and related logic to simplify the processing interface.
     - Other image adjustment and PDF generation functions remain unaffected.
+
+15. **Image Reset Fix (2025-06-15)**
+    - Added `restoreOriginalImage()` in `imageProcessor.js` to reload the unedited file from `imageManager`.
+    - Reset button now calls this method before clearing adjustments so applied edits can be undone.

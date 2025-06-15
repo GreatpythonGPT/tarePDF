@@ -52,7 +52,10 @@ class ImageProcessor {
         this.bindAdjustmentSliders();
         
         // 操作按钮事件
-        document.getElementById('reset-adjustments')?.addEventListener('click', () => this.resetAdjustments());
+        document.getElementById('reset-adjustments')?.addEventListener('click', () => {
+            this.restoreOriginalImage();
+            this.resetAdjustments();
+        });
         document.getElementById('apply-adjustments')?.addEventListener('click', () => this.applyAdjustments());
         
         // 曲线编辑器事件
@@ -355,12 +358,45 @@ class ImageProcessor {
     
     resizeCanvas() {
         if (!this.canvas) return;
-        
+
         const container = this.canvas.parentElement;
         if (container) {
             this.canvas.width = container.clientWidth;
             this.canvas.height = container.clientHeight;
         }
+    }
+
+    // 恢复当前图片为原始状态（用于重置按钮）
+    restoreOriginalImage() {
+        if (!window.imageManager || this.selectedThumbnailIndex === -1) return;
+
+        const imageObj = window.imageManager.images[this.selectedThumbnailIndex];
+        if (!imageObj || !imageObj.originalUrl) return;
+
+        const img = new Image();
+        img.onload = () => {
+            this.currentImage = img;
+            this.processedImageData = null;
+            this.saveOriginalImageData(img);
+
+            // 更新图片对象引用
+            if (imageObj.url && imageObj.url !== imageObj.originalUrl) {
+                URL.revokeObjectURL(imageObj.url);
+            }
+            imageObj.url = imageObj.originalUrl;
+            imageObj.file = imageObj.originalFile;
+
+            utils.createThumbnail(imageObj.file, 200).then(thumbnail => {
+                imageObj.thumbnail = thumbnail;
+                window.imageManager.renderImages();
+            }).catch(err => {
+                console.warn('更新缩略图失败:', err);
+            });
+
+            this.drawImageToCanvas();
+        };
+
+        img.src = imageObj.originalUrl;
     }
     
     clearCanvas() {
