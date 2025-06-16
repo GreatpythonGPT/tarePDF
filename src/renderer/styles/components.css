@@ -521,17 +521,18 @@
 .slider-container {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
+  padding: 0 12px;
   margin-bottom: 12px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  height: 60px;
+  box-sizing: border-box;
 }
 
 .form-slider {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   height: 6px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
@@ -576,28 +577,21 @@
 }
 
 .slider-value {
-  min-width: 80px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.1);
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(5px);
+  display: contents;
 }
 
 .slider-input {
   width: 48px;
   text-align: center;
-  background: transparent !important;
-  border: none !important;
+  background: transparent;
+  border: none;
   color: #d1d1d1;
+  font-size: 14px;
 }
 
 .slider-input:focus {
   outline: 2px solid var(--color-accent-default);
+  border-radius: 4px;
 }
 
 /* 开关组件 - Fluent Design */
