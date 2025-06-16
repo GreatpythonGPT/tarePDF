@@ -244,6 +244,10 @@ html, body {
   overflow: hidden;
 }
 
+#processing-tab.page-body {
+  padding-bottom: 0;
+}
+
 /* 标签页头部 - Fluent Design */
 .tab-header {
   display: flex;
@@ -821,7 +825,9 @@ html, body {
   height: 100%;
   background: #1a1a1a;
   position: relative;
+  padding-bottom: 0 !important; /* avoid extra space below thumbnails */
 }
+
 
 /* 主预览区域 - 占满剩余空间 */
 .preview-area {
@@ -949,6 +955,7 @@ html, body {
 
 .processing-layout > .thumbnail-strip {
   overflow-x: auto !important;
+  flex: 0 0 var(--statusBarH);
 }
 
 .thumbnail-container {
