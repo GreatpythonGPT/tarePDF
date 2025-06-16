@@ -91,3 +91,7 @@ This project is an Electron based image management and PDF generation tool desig
 18. **Sharpen Effect Adjustment (2025-06-15)**
     - Increased the unsharp mask strength so the slider visibly changes the image.
 
+19. **Fluent 2 Theme Tokens (2025-06-16)**
+    - Added a new `theme.js` module that injects Fluent 2 design tokens as CSS variables.
+    - Included the script in `index.html` and applied tokens to sidebar and button styles.
+

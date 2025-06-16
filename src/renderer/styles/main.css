@@ -5,6 +5,23 @@
   box-sizing: border-box;
 }
 
+:root {
+  --radius-xs: 4px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+  --shadow1: 0 1px 2px rgba(0,0,0,.07);
+  --shadow4: 0 4px 8px rgba(0,0,0,.12);
+  --color-neutral-bg: #1f1f1f;
+  --color-neutral-bg-alt: #252525;
+  --color-card-bg: #2b2b2b;
+  --color-accent-default: #5569ff;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #d1d1d1;
+  --color-border-subtle: rgba(255,255,255,.08);
+  --duration-fast: 120ms;
+  --easing: cubic-bezier(.4,0,.2,1);
+}
+
 html, body {
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
@@ -32,18 +49,18 @@ html, body {
 /* 侧边栏样式 - Fluent Design */
 .sidebar {
   width: 240px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-neutral-bg-alt);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  border-right: 1px solid var(--color-border-subtle);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow4);
 }
 
 .sidebar-header {
   padding: 32px 24px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-neutral-bg);
 }
 
 .logo {
@@ -60,7 +77,7 @@ html, body {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 0.1);
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-m);
 }
 
 /* 导航样式 - Fluent Design */
@@ -84,7 +101,7 @@ html, body {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   position: relative;
 }
 
@@ -251,7 +268,7 @@ html, body {
   gap: 10px;
   padding: 12px 20px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--radius-l);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -269,28 +286,28 @@ html, body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: var(--color-accent-default);
+  color: var(--color-text-primary);
+  border: none;
+  box-shadow: var(--shadow1);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: scale(1.02) translateY(-2px);
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow4);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-subtle);
   backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   transform: scale(1.02) translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow1);
 }
 
 .btn-success {
