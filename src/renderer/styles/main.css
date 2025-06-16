@@ -243,6 +243,17 @@ html, body {
   padding-bottom: var(--statusBarH);
 }
 
+/* 图片管理页内滚动区与固定头部 */
+#images-tab.image-manager {
+  overflow: hidden;
+}
+
+#images-tab.image-manager .tab-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
 /* 图片处理页面避免嵌套滚动 */
 #processing-tab.tab-content {
   overflow: hidden;
@@ -367,6 +378,7 @@ html, body {
 /* 图片容器 */
 .images-container {
   flex: 1;
+  min-height: 0;
   overflow: auto;
   padding: 24px 32px;
 }

@@ -141,3 +141,7 @@ This project is an Electron based image management and PDF generation tool desig
 
 28. **Slider value color fix in settings (2025-06-16)**
     - Ensured all `.slider-value` elements inherit white text via `--sliderValueColor` in `components.css` and `main.css`.
+29. **Sticky toolbar in image manager (2025-06-16)**
+    - Added 'image-manager' class in index.html.
+    - Made the tab header sticky and contained scrolling to the image grid.
+    - Updated CSS to remove extra scrollbars and align header background.
