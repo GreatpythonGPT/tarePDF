@@ -110,3 +110,9 @@ This project is an Electron based image management and PDF generation tool desig
     - Enlarged processing thumbnails to match the new strip height and adjusted responsive size.
     - Ensured horizontal scrolling always works by forcing overflow on the strip and binding wheel events.
     - Removed the right‑side margin from the main content and set the adjustment panel background to `#1f1f1f` to eliminate the dark gap.
+
+23. **Unified page layout (2025-06-16)**
+    - Introduced `--statusBarH` variable and applied it to thumbnail strip height.
+    - Converted `.main-content` to a flex column container with full height and created a reusable `.page-body` class.
+    - Added the class to all three tab pages so their content aligns with the left status bar.
+    - Tweaked the thumbnail strip style to reference the variable.
