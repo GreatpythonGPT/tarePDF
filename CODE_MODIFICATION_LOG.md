@@ -127,3 +127,8 @@ This project is an Electron based image management and PDF generation tool desig
     - Limited the thumbnail strip to the middle column and inserted a 2px pseudo element to always allow horizontal scrolling.
     - Height of the strip and thumbnails synced to `--thumbBarH` (215px) with JavaScript updated accordingly.
     - Removed leftover flex layout rules and width calculations on preview and thumbnail containers.
+
+26. **UI touch ups (2025-06-16)**
+    - Simplified `.slider-input` styles with transparent background and no border to avoid layout overflow.
+    - Colored watermark card titles using new variables `--clrA`–`--clrD` and added `wm-a`..`wm-d` classes in HTML.
+

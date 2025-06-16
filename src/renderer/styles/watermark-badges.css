@@ -139,3 +139,21 @@
   border-top-color: rgba(0, 0, 0, 0.8);
   z-index: 1000;
 }
+
+/* 水印卡片标题色彩 */
+:root {
+  --clrA: #c62828;
+  --clrB: #c77800;
+  --clrC: #1565c0;
+  --clrD: #00695c;
+}
+
+h3.watermark-title {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.wm-a h3.watermark-title { color: var(--clrA); }
+.wm-b h3.watermark-title { color: var(--clrB); }
+.wm-c h3.watermark-title { color: var(--clrC); }
+.wm-d h3.watermark-title { color: var(--clrD); }

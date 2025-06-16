@@ -589,17 +589,15 @@
 }
 
 .slider-input {
-  max-width: 100px;
-  margin-top: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
+  width: 48px;
+  text-align: center;
+  background: transparent !important;
+  border: none !important;
+  color: #d1d1d1;
 }
 
 .slider-input:focus {
-  border-color: rgba(102, 126, 234, 0.5);
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  outline: 2px solid var(--color-accent-default);
 }
 
 /* 开关组件 - Fluent Design */
