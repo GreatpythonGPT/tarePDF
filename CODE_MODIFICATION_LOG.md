@@ -99,3 +99,8 @@ This project is an Electron based image management and PDF generation tool desig
     - Created `fluentTheme.ts` exporting token values.
     - Updated thumbnail strip to convert wheel scrolling to horizontal and fixed its height.
     - Tweaked thumbnail card hover and selection styles using tokens.
+
+21. **Processing layout cleanup (2025-06-16)**
+    - Converted the preview area to flex-grow so it fills remaining space.
+    - Added `min-height: 0` to prevent the preview from pushing down the thumbnails.
+    - Updated HTML comment and kept the thumbnail strip height at 112px via CSS only.
