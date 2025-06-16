@@ -127,3 +127,14 @@
 .watermark-control-btn.pulse {
     animation: pulse 1s ease-out;
 }
+
+/* 通用滑块右侧数字样式 */
+.slider-input {
+    color: var(--sliderValueColor) !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.slider-input[disabled] {
+    opacity: .4;
+}

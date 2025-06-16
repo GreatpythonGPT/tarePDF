@@ -585,8 +585,12 @@
   text-align: center;
   background: transparent;
   border: none;
-  color: #d1d1d1;
+  color: var(--sliderValueColor);
   font-size: 14px;
+}
+
+.slider-input[disabled] {
+  opacity: 0.4;
 }
 
 .slider-input:focus {
@@ -657,7 +661,7 @@
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--sliderValueColor);
   text-align: center;
 }
 

@@ -24,6 +24,7 @@
   --leftNavW: 180px;
   --rightPanelW: 300px;
   --thumbBarH: 215px;
+  --sliderValueColor: #ffffff;
 }
 
 html, body {
@@ -1254,8 +1255,19 @@ html, body {
     width: 280px;
   }
   
-  .processing-thumbnail {
+.processing-thumbnail {
     width: 100px;
     height: 106px;
   }
+}
+
+/* 输出尺寸卡片滑块数值颜色 */
+.output-size .slider-input {
+  color: var(--sliderValueColor) !important;
+}
+
+/* 分隔页滑块数值统一颜色 */
+.separator-page .slider-input,
+.separator-page .form-input-small {
+  color: var(--sliderValueColor) !important;
 }

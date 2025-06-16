@@ -132,3 +132,9 @@ This project is an Electron based image management and PDF generation tool desig
     - Simplified `.slider-input` styles with transparent background and no border to avoid layout overflow.
     - Colored watermark card titles using new variables `--clrA`–`--clrD` and added `wm-a`..`wm-d` classes in HTML.
 
+
+27. **Slider value color fix (2025-06-16)**
+    - Added `--sliderValueColor` variable in `main.css` and applied it to all slider input fields.
+    - Updated `components.css` and `watermark-controls.css` to use the variable and support disabled opacity.
+    - Assigned new classes `output-size` and `separator-page` in HTML and styled them to ensure white slider values.
+
