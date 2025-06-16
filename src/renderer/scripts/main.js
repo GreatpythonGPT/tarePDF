@@ -365,7 +365,14 @@ class App {
   updateThumbnailHeight() {
     const strip = document.querySelector('.thumbnail-strip');
     if (strip) {
-      strip.style.height = '160px';
+      strip.style.height = '218px';
+      if (!strip.dataset.wheelBound) {
+        strip.addEventListener('wheel', e => {
+          e.preventDefault();
+          strip.scrollLeft += e.deltaY;
+        });
+        strip.dataset.wheelBound = 'true';
+      }
     }
   }
   

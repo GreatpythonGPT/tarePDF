@@ -116,3 +116,8 @@ This project is an Electron based image management and PDF generation tool desig
     - Converted `.main-content` to a flex column container with full height and created a reusable `.page-body` class.
     - Added the class to all three tab pages so their content aligns with the left status bar.
     - Tweaked the thumbnail strip style to reference the variable.
+
+24. **Thumbnail strip final adjustments (2025-06-16)**
+    - Added `--thumbBarH` variable in `components.css` and enforced the thumbnail strip height at 218px with a persistent scrollbar.
+    - Updated `main.css` to use the new variable and ensured the processing layout reserves the correct height.
+    - Modified `main.js` to apply the height in script and bind wheel events once.

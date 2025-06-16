@@ -1,3 +1,8 @@
+/* 全局变量 */
+:root {
+  --thumbBarH: 218px; /* 与左侧状态栏高度一致 */
+}
+
 /* 图片卡片组件 */
 .image-card {
   position: relative;
@@ -662,4 +667,21 @@
   border-radius: 8px;
   color: rgba(255, 255, 255, 0.9);
   text-align: center;
+}
+
+/* -------- 图片处理缩略条 -------- */
+.thumbnail-strip {
+  height: var(--thumbBarH) !important;
+  flex: 0 0 var(--thumbBarH) !important;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  overflow-x: scroll !important;
+  overflow-y: hidden !important;
+  scrollbar-gutter: stable both-edges;
+}
+
+.thumbnail-strip::-webkit-scrollbar {
+  height: 8px;
 }
