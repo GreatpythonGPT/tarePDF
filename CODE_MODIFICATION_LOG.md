@@ -145,3 +145,6 @@ This project is an Electron based image management and PDF generation tool desig
     - Added 'image-manager' class in index.html.
     - Made the tab header sticky and contained scrolling to the image grid.
     - Updated CSS to remove extra scrollbars and align header background.
+30. **Image manager scrolling fix (2025-06-16)**
+    - Converted the images tab to a two-row grid so the toolbar remains sticky and the card grid can scroll.
+    - Added an 'img-grid-wrapper' div with overflow-y:auto so imported images are scrollable.

@@ -245,10 +245,13 @@ html, body {
 
 /* 图片管理页内滚动区与固定头部 */
 #images-tab.image-manager {
-  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow-x: hidden;
 }
 
 #images-tab.image-manager .tab-header {
+  grid-row: 1 / 2;
   position: sticky;
   top: 0;
   z-index: 5;
@@ -376,10 +379,13 @@ html, body {
 }
 
 /* 图片容器 */
-.images-container {
+.images-container,
+.img-grid-wrapper {
+  grid-row: 2 / 3;
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 24px 32px;
 }
 
