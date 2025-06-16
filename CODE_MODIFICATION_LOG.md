@@ -138,3 +138,6 @@ This project is an Electron based image management and PDF generation tool desig
     - Updated `components.css` and `watermark-controls.css` to use the variable and support disabled opacity.
     - Assigned new classes `output-size` and `separator-page` in HTML and styled them to ensure white slider values.
 
+
+28. **Slider value color fix in settings (2025-06-16)**
+    - Ensured all `.slider-value` elements inherit white text via `--sliderValueColor` in `components.css` and `main.css`.

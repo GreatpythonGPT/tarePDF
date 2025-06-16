@@ -1144,6 +1144,7 @@ html, body {
 
 .slider-value {
   flex: 0 0 auto;
+  color: var(--sliderValueColor);
 }
 
 .adjustment-input {

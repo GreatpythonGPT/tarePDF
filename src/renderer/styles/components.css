@@ -578,6 +578,7 @@
 
 .slider-value {
   display: contents;
+  color: var(--sliderValueColor);
 }
 
 .slider-input {
