@@ -1,0 +1,11 @@
+.glass {
+  backdrop-filter: blur(10px) saturate(160%);
+  background: rgba(31,31,31,.72);
+  border: 1px solid rgba(255,255,255,.08);
+}
+@media (prefers-reduced-transparency: reduce){
+  .glass {
+    backdrop-filter: none;
+    background: #252525;
+  }
+}

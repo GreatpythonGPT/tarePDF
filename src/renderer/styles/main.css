@@ -906,63 +906,64 @@ html, body {
   margin-left: 8px;
 }
 
-/* 缩略图条 (25%高度) */
+/* 缩略图条 */
 .thumbnail-strip {
-  flex: 0 0 var(--thumbnail-height, 25%);
-  background: #1e1e1e;
-  border-bottom: 1px solid #404040;
-  position: relative;
+  display: flex;
+  gap: 16px;
+  padding: 12px 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 112px;
+  scrollbar-gutter: stable both-edges;
+}
+
+.thumbnail-strip::-webkit-scrollbar {
+  height: 8px;
+}
+
+.thumbnail-strip::-webkit-scrollbar-track {
+  background: #2a2a2a;
+}
+
+.thumbnail-strip::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.thumbnail-strip::-webkit-scrollbar-thumb:hover {
+  background: #666;
 }
 
 .thumbnail-container {
   width: calc(100% - 320px); /* 减去右侧面板宽度 */
   height: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
   display: flex;
   align-items: center;
-  padding: 16px;
   gap: 12px;
+  padding: 0;
   scroll-behavior: smooth;
-}
-
-.thumbnail-container::-webkit-scrollbar {
-  height: 8px;
-}
-
-.thumbnail-container::-webkit-scrollbar-track {
-  background: #2a2a2a;
-}
-
-.thumbnail-container::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 4px;
-}
-
-.thumbnail-container::-webkit-scrollbar-thumb:hover {
-  background: #666;
 }
 
 .processing-thumbnail {
   flex: 0 0 auto;
   width: 120px;
   height: 80px;
-  border-radius: 8px;
+  border-radius: var(--radius-m);
   overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: all 0.2s ease;
+  transition: transform var(--duration-fast) var(--easing);
   position: relative;
 }
 
 .processing-thumbnail:hover {
-  border-color: rgba(74, 144, 226, 0.5);
-  transform: scale(1.05);
+  transform: scale(1.04);
+  box-shadow: var(--shadow4);
 }
 
 .processing-thumbnail.selected {
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.3);
+  border: 2px solid var(--color-accent-default);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
 }
 
 .processing-thumbnail img {

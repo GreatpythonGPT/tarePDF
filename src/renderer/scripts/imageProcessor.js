@@ -132,26 +132,11 @@ class ImageProcessor {
     }
     
     bindThumbnailScrollEvents() {
-        const thumbnailContainer = document.getElementById('processing-thumbnails');
-        if (thumbnailContainer) {
-            thumbnailContainer.addEventListener('wheel', (e) => {
-                // 检查是否按下中键或者是横向滚动
-                if (e.deltaX !== 0 || e.shiftKey) {
-                    // 横向滚动
-                    e.preventDefault();
-                    thumbnailContainer.scrollLeft += e.deltaY;
-                } else if (e.button === 1 || e.buttons === 4) {
-                    // 中键滚动转换为横向滚动
-                    e.preventDefault();
-                    thumbnailContainer.scrollLeft += e.deltaY;
-                }
-            });
-            
-            // 中键按下事件
-            thumbnailContainer.addEventListener('mousedown', (e) => {
-                if (e.button === 1) { // 中键
-                    e.preventDefault();
-                }
+        const strip = document.querySelector('.thumbnail-strip');
+        if (strip) {
+            strip.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                strip.scrollLeft += e.deltaY;
             });
         }
     }

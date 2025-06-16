@@ -363,11 +363,9 @@ class App {
   }
 
   updateThumbnailHeight() {
-    const footer = document.querySelector('.sidebar-footer');
     const strip = document.querySelector('.thumbnail-strip');
-    if (footer && strip) {
-      const h = footer.offsetHeight;
-      strip.style.setProperty('--thumbnail-height', `${h}px`);
+    if (strip) {
+      strip.style.height = '112px';
     }
   }
   

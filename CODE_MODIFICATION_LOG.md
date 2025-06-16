@@ -94,4 +94,8 @@ This project is an Electron based image management and PDF generation tool desig
 19. **Fluent 2 Theme Tokens (2025-06-16)**
     - Added a new `theme.js` module that injects Fluent 2 design tokens as CSS variables.
     - Included the script in `index.html` and applied tokens to sidebar and button styles.
-
+20. **Fluent visual refresh and scroll fix (2025-06-16)**
+    - Introduced reusable `glass` class for sidebar and headers.
+    - Created `fluentTheme.ts` exporting token values.
+    - Updated thumbnail strip to convert wheel scrolling to horizontal and fixed its height.
+    - Tweaked thumbnail card hover and selection styles using tokens.
