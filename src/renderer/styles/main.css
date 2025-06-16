@@ -21,6 +21,9 @@
   --duration-fast: 120ms;
   --easing: cubic-bezier(.4,0,.2,1);
   --statusBarH: 160px;
+  --leftNavW: 180px;
+  --rightPanelW: 300px;
+  --thumbBarH: 215px;
 }
 
 html, body {
@@ -820,27 +823,29 @@ html, body {
 
 /* 图片处理布局 - Lightroom风格 */
 .processing-layout {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr var(--rightPanelW);
+  grid-template-rows: 1fr var(--thumbBarH);
   height: 100%;
   background: #1a1a1a;
   position: relative;
-  padding-bottom: 0 !important; /* avoid extra space below thumbnails */
+  overflow: hidden;
 }
 
 
 /* 主预览区域 - 占满剩余空间 */
 .preview-area {
-  flex: 1 1 auto;
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
   min-height: 0;
   background: #2a2a2a;
   border-bottom: 1px solid #404040;
   position: relative;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .preview-container {
-  width: calc(100% - 320px); /* 减去右侧面板宽度 */
+  width: 100%;
   height: 100%;
   position: relative;
   display: flex;
@@ -925,15 +930,21 @@ html, body {
 
 /* 缩略图条 */
 .thumbnail-strip {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 0 24px;
-  overflow-x: scroll;
+  overflow-x: scroll !important;
   overflow-y: hidden;
   height: var(--thumbBarH);
-  flex: 0 0 var(--thumbBarH);
   scrollbar-gutter: stable both-edges;
+}
+
+.thumbnail-strip::after {
+  content: '';
+  flex: 0 0 2px;
 }
 
 .thumbnail-strip::-webkit-scrollbar {
@@ -953,13 +964,8 @@ html, body {
   background: #666;
 }
 
-.processing-layout > .thumbnail-strip {
-  overflow-x: scroll !important;
-  flex: 0 0 var(--thumbBarH);
-}
 
 .thumbnail-container {
-  width: calc(100% - 320px); /* 减去右侧面板宽度 */
   height: 100%;
   display: flex;
   align-items: center;
@@ -1008,11 +1014,9 @@ html, body {
 
 /* 右侧调整面板 (固定320px宽度) */
 .adjustment-panel {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 320px;
-  height: 100%;
+  grid-column: 2 / 3;
+  grid-row: 1 / 3;
+  width: var(--rightPanelW);
   background: #1f1f1f;
   border-left: 1px solid #404040;
   display: flex;
@@ -1243,21 +1247,11 @@ html, body {
   .adjustment-panel {
     width: 300px;
   }
-  
-  .preview-container,
-  .thumbnail-container {
-    width: calc(100% - 300px);
-  }
 }
 
 @media (max-width: 1200px) {
   .adjustment-panel {
     width: 280px;
-  }
-  
-  .preview-container,
-  .thumbnail-container {
-    width: calc(100% - 280px);
   }
   
   .processing-thumbnail {

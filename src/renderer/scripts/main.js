@@ -365,7 +365,7 @@ class App {
   updateThumbnailHeight() {
     const strip = document.querySelector('.thumbnail-strip');
     if (strip) {
-      strip.style.height = '218px';
+      strip.style.height = '215px';
       if (!strip.dataset.wheelBound) {
         strip.addEventListener('wheel', e => {
           e.preventDefault();

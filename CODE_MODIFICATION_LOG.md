@@ -121,3 +121,9 @@ This project is an Electron based image management and PDF generation tool desig
     - Added `--thumbBarH` variable in `components.css` and enforced the thumbnail strip height at 218px with a persistent scrollbar.
     - Updated `main.css` to use the new variable and ensured the processing layout reserves the correct height.
     - Modified `main.js` to apply the height in script and bind wheel events once.
+
+25. **Thumbnail strip width fix (2025-06-16)**
+    - Converted `.processing-layout` to a two-column grid so the right adjustment panel occupies its own column.
+    - Limited the thumbnail strip to the middle column and inserted a 2px pseudo element to always allow horizontal scrolling.
+    - Height of the strip and thumbnails synced to `--thumbBarH` (215px) with JavaScript updated accordingly.
+    - Removed leftover flex layout rules and width calculations on preview and thumbnail containers.
