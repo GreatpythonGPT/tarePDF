@@ -104,3 +104,9 @@ This project is an Electron based image management and PDF generation tool desig
     - Converted the preview area to flex-grow so it fills remaining space.
     - Added `min-height: 0` to prevent the preview from pushing down the thumbnails.
     - Updated HTML comment and kept the thumbnail strip height at 112px via CSS only.
+
+22. **Thumbnail strip and layout tweaks (2025-06-16)**
+    - Raised the thumbnail strip to 160px and centered its items for better alignment with the sidebar.
+    - Enlarged processing thumbnails to match the new strip height and adjusted responsive size.
+    - Ensured horizontal scrolling always works by forcing overflow on the strip and binding wheel events.
+    - Removed the right‑side margin from the main content and set the adjustment panel background to `#1f1f1f` to eliminate the dark gap.

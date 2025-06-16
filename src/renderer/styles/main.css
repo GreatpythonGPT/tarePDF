@@ -211,7 +211,7 @@ html, body {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  margin: 0 16px 16px 0;
+  margin: 0 0 16px 0;
   border-radius: 0;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -910,11 +910,13 @@ html, body {
 /* 缩略图条 */
 .thumbnail-strip {
   display: flex;
+  align-items: center;
   gap: 16px;
-  padding: 12px 24px;
+  padding: 0 24px;
   overflow-x: auto;
   overflow-y: hidden;
-  height: 112px;
+  height: 160px;
+  flex: 0 0 auto;
   scrollbar-gutter: stable both-edges;
 }
 
@@ -935,6 +937,10 @@ html, body {
   background: #666;
 }
 
+.processing-layout > .thumbnail-strip {
+  overflow-x: auto !important;
+}
+
 .thumbnail-container {
   width: calc(100% - 320px); /* 减去右侧面板宽度 */
   height: 100%;
@@ -948,7 +954,7 @@ html, body {
 .processing-thumbnail {
   flex: 0 0 auto;
   width: 120px;
-  height: 80px;
+  height: 128px;
   border-radius: var(--radius-m);
   overflow: hidden;
   cursor: pointer;
@@ -990,7 +996,7 @@ html, body {
   right: 0;
   width: 320px;
   height: 100%;
-  background: #1a1a1a;
+  background: #1f1f1f;
   border-left: 1px solid #404040;
   display: flex;
   flex-direction: column;
@@ -1239,6 +1245,6 @@ html, body {
   
   .processing-thumbnail {
     width: 100px;
-    height: 67px;
+    height: 106px;
   }
 }

@@ -365,7 +365,7 @@ class App {
   updateThumbnailHeight() {
     const strip = document.querySelector('.thumbnail-strip');
     if (strip) {
-      strip.style.height = '112px';
+      strip.style.height = '160px';
     }
   }
   
