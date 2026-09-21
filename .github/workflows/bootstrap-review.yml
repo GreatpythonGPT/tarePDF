@@ -20,6 +20,7 @@ jobs:
           cd /tmp/tare-v2-deps
           npm init -y
           npm install --save-exact pdf-lib@1.17.1 electron@44.4.3 electron-builder@26.16.1 playwright@1.57.0
+          node node_modules/electron/install.js
       - name: Prepare source and dependency snapshot (no fonts or user data)
         run: |
           mkdir -p /tmp/tare-v2-snapshot
