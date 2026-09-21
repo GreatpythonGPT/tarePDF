@@ -1,34 +1,29 @@
-name: Prepare v2 verification
+name: Finalize v2 dependency lock
 on:
   push:
     branches: [refactor/pdf-workflow-v2]
-    paths: [.github/workflows/bootstrap-review.yml]
+    paths: [package.json, .github/workflows/bootstrap-review.yml]
 permissions:
-  contents: read
+  contents: write
 jobs:
-  prepare:
+  lock:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: refactor/pdf-workflow-v2
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install isolated test dependencies
+      - name: Generate lock for the pinned v2 manifest
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit generated lock only
         run: |
-          mkdir -p /tmp/tare-v2-deps
-          cd /tmp/tare-v2-deps
-          npm init -y
-          npm install --save-exact pdf-lib@1.17.1 electron@44.4.3 electron-builder@26.16.1 playwright@1.57.0
-          node node_modules/electron/install.js
-      - name: Prepare source and dependency snapshot (no fonts or user data)
-        run: |
-          mkdir -p /tmp/tare-v2-snapshot
-          git archive HEAD src README.md BUILD_GUIDE.md package.json package-lock.json assets .gitignore > /tmp/tare-v2-snapshot/source.tar
-          cp /tmp/tare-v2-deps/package-lock.json /tmp/tare-v2-snapshot/dependency-lock.json
-          tar -czf /tmp/tare-v2-snapshot/dependencies.tar.gz -C /tmp/tare-v2-deps node_modules package.json package-lock.json
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tare-v2-verification-inputs
-          path: /tmp/tare-v2-snapshot
-          retention-days: 1
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package-lock.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'build: lock v2 dependencies for reproducible installation'
+            git push origin HEAD:refactor/pdf-workflow-v2
+          fi
