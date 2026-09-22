@@ -14,7 +14,7 @@
     "dev": "electron . --dev",
     "check": "node scripts/check.cjs",
     "test": "node --test tests/model.test.cjs tests/services.test.cjs",
-    "test:e2e": "node tests/e2e.cjs",
+    "test:e2e": "node tests/e2e.cjs && node tests/ui-polish.cjs",
     "prebuild": "npm run prepare",
     "build": "electron-builder --win portable --publish never",
     "predist": "npm run prepare",
