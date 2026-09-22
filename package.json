@@ -1,72 +1,43 @@
 {
   "name": "tare-pdf-generator",
-  "version": "1.0.0",
-  "description": "渲染图演示 PDF 生成器 - 专为设计师打造的图片批量处理和PDF生成工具",
+  "version": "2.0.0",
+  "description": "为设计师整理图片、排序、预览并离线导出演示 PDF",
   "main": "src/main.js",
-  "scripts": {
-    "start": "electron .",
-    "dev": "electron . --dev",
-    "build": "electron-builder",
-    "dist": "electron-builder --publish=never"
-  },
-  "keywords": [
-    "electron",
-    "pdf",
-    "image",
-    "generator",
-    "design"
-  ],
-  "author": "Your Name",
+  "author": "GreatpythonGPT",
   "license": "MIT",
-  "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1",
-    "electron-packager": "^17.1.2"
+  "engines": { "node": ">=22.16.0" },
+  "scripts": {
+    "prepare": "node scripts/prepare.cjs",
+    "prestart": "npm run prepare",
+    "start": "electron .",
+    "predev": "npm run prepare",
+    "dev": "electron . --dev",
+    "check": "node scripts/check.cjs",
+    "test": "node --test tests/model.test.cjs tests/services.test.cjs",
+    "test:e2e": "node tests/e2e.cjs && node tests/ui-polish.cjs",
+    "prebuild": "npm run prepare",
+    "build": "electron-builder --win portable --publish never",
+    "predist": "npm run prepare",
+    "dist": "electron-builder --win portable --publish never"
   },
-  "dependencies": {
-    "electron-store": "^8.1.0",
-    "pdf-lib": "^1.17.1",
-    "sharp": "^0.33.1"
+  "dependencies": { "pdf-lib": "1.17.1" },
+  "devDependencies": {
+    "electron": "44.4.3",
+    "electron-builder": "26.16.1",
+    "playwright": "1.57.0"
   },
   "build": {
     "appId": "com.tarepdf.generator",
     "productName": "Tare PDF Generator",
+    "directories": { "output": "dist" },
+    "files": ["src/**/*", "assets/**/*", "package.json"],
+    "asar": true,
     "forceCodeSigning": false,
-    "afterSign": false,
-    "afterAllArtifactBuild": false,
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "src/**/*",
-      "fonts/**/*",
-      "assets/**/*",
-      "node_modules/**/*",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "fonts",
-        "to": "fonts"
-      }
-    ],
     "win": {
-      "target": {
-        "target": "portable",
-        "arch": [
-          "x64"
-        ]
-      },
-      "publisherName": "Tare PDF Generator",
+      "target": [{ "target": "portable", "arch": ["x64"] }],
+      "artifactName": "tarePDF-${version}-win-${arch}.${ext}",
       "requestedExecutionLevel": "asInvoker",
-      "sign": false
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Tare PDF Generator"
+      "signAndEditExecutable": false
     }
   }
 }

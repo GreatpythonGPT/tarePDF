@@ -41,3 +41,6 @@ jspm_packages/
 .npm
 
 # Optional eslint cache
+# Generated local PDF runtime and verification outputs
+src/renderer/vendor/
+test-results/
