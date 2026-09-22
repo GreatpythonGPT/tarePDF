@@ -779,7 +779,7 @@ small {
 .notice>span {
   flex:1;
   min-width:0;
-  max-height:140px;
+  max-height:min(140px,18vh);
   overflow:auto;
   overflow-wrap:anywhere;
   white-space:pre-line;
