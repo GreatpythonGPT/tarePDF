@@ -5,6 +5,9 @@ on:
   pull_request:
 permissions:
   contents: read
+concurrency:
+  group: tare-verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
     strategy:
@@ -21,14 +24,23 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node node_modules/electron/install.js
+      - name: Configure Electron sandbox helper (Linux runner only)
+        if: runner.os == 'Linux'
+        run: |
+          sudo chown root:root node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
       - run: npm run check
       - run: npm test
       - name: Electron integration tests (Linux)
         if: runner.os == 'Linux'
         run: xvfb-run -a npm run test:e2e
+        env:
+          DEBUG: pw:browser
       - name: Electron integration tests (Windows)
         if: runner.os == 'Windows'
         run: npm run test:e2e
+        env:
+          DEBUG: pw:browser
       - name: Production dependency audit
         run: npm audit --omit=dev --audit-level=high
       - name: Build portable Windows application
