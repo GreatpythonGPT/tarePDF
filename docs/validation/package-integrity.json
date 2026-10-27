@@ -1,0 +1,31 @@
+{
+  "version": "2.1.0",
+  "archives": [
+    {
+      "platform": "linux-unpacked",
+      "filesMatched": [
+        "app/app.js",
+        "app/index.html",
+        "app/style.css",
+        "app/image.worker.js",
+        "src/main.js",
+        "src/desktop.cjs",
+        "src/preload.js"
+      ],
+      "sha256": "ea0c470f6540102343d97997bcaab3fa92f859afa67263bef3d5a633fa4baa44"
+    },
+    {
+      "platform": "win-unpacked",
+      "filesMatched": [
+        "app/app.js",
+        "app/index.html",
+        "app/style.css",
+        "app/image.worker.js",
+        "src/main.js",
+        "src/desktop.cjs",
+        "src/preload.js"
+      ],
+      "sha256": "ea0c470f6540102343d97997bcaab3fa92f859afa67263bef3d5a633fa4baa44"
+    }
+  ]
+}

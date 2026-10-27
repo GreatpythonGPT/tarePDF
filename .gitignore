@@ -41,3 +41,7 @@ jspm_packages/
 .npm
 
 # Optional eslint cache
+.eslintcache
+app/
+dist/
+test-results/
