@@ -1,4 +1,5 @@
 import { annotationDefaults, validateAnnotation } from './annotations.mjs';
+import { outputDefaults, validateOutput } from './output-settings.mjs';
 export const VERSION = 2;
 export const uid = () => globalThis.crypto.randomUUID();
 // Keep immutable data URL strings shared between history entries; copying their bytes
@@ -6,7 +7,7 @@ export const uid = () => globalThis.crypto.randomUUID();
 export const clone = value => Array.isArray(value) ? value.map(clone) : value && typeof value === 'object' ? Object.fromEntries(Object.entries(value).map(([key, item]) => [key, clone(item)])) : value;
 export const adjustments = () => ({ exposure: 0, brightness: 0, contrast: 0, saturation: 0, temperature: 0, sharpness: 0 });
 export function createProject() {
-  return { version: VERSION, name: '未命名作品', pages: [], layouts: {}, export: { width: 2400, scope: 'all', cover: false, title: '我的作品集', separator: false, background: '#ffffff' } };
+  return { version: VERSION, name: '未命名作品', pages: [], layouts: {}, export: outputDefaults() };
 }
 export function addPage(project, image) {
   const layoutId = uid();
@@ -176,10 +177,7 @@ export function validateProject(input) {
     for (const key of Object.keys(adj)) { if (!finite(p.adjustments?.[key], key === 'sharpness' ? 0 : -100, 100)) fail(); adj[key] = p.adjustments[key]; }
     project.pages.push({ id: p.id, name: p.name, src: p.src, width: p.width, height: p.height, layoutId: p.layoutId, rotation: p.rotation, crop: { x: p.crop.x, y: p.crop.y, w: p.crop.w, h: p.crop.h }, adjustments: adj });
   }
-  const exp = input.export || {};
-  if (exp.width !== undefined && ![1600, 2400, 3600, 0].includes(exp.width)) fail();
-  if (exp.title !== undefined && (typeof exp.title !== 'string' || exp.title.length > 1000)) fail();
-  project.export = { ...project.export, width: exp.width ?? 2400, scope: exp.scope === 'selected' ? 'selected' : 'all', cover: !!exp.cover, title: exp.title ?? '我的作品集', separator: !!exp.separator, background: color(exp.background) ? exp.background : '#ffffff' };
+  project.export = validateOutput(input.export);
   collectLayouts(project); return project;
 }
 export function validImageData(src) { return typeof src === 'string' && src.length < 100000000 && /^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/]+=*$/.test(src); }

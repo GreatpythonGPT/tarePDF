@@ -1,4 +1,4 @@
-# Tare Studio 2.1 构建
+# Tare Studio 2.2 构建
 
 ```sh
 npm ci
@@ -39,9 +39,9 @@ TARE_E2E_NO_SANDBOX=1 xvfb-run -a -s '-screen 0 1600x1050x24' npm run test:e2e
 
 ## 发布可直接下载的应用
 
-`.github/workflows/release.yml` 在推送 `v2.1.0` 这类版本标签时运行，也可从 Actions 手动指定已有标签。标签必须匹配 `package.json` 的版本。
+`.github/workflows/release.yml` 在推送 `v2.2.0` 这类版本标签时运行，也可从 Actions 手动指定已有标签。标签必须匹配 `package.json` 的版本。
 
-流程在 Windows 上安装锁定依赖、运行单元测试、构建便携版，并对打包后的程序运行两套完整交互测试。测试通过后，整理程序、可编辑示例、预览 PDF、中文说明和 SHA-256 校验文件；独立发布任务将完整附件上传到草稿，再公开 Releases 页面，并重新下载校验。
+流程在 Windows 上安装锁定依赖、运行单元测试、构建便携版，并对打包后的程序运行单图编辑、模板标注、整组编排三套交互测试。测试通过后，整理程序、两份可编辑示例及对应预览 PDF、中文说明和 SHA-256 校验文件；独立发布任务将完整附件上传到草稿，再公开 Releases 页面，并重新下载校验。
 
 只有发布任务拥有 `contents: write` 权限。未通过测试的包不会进入发行版；发布操作不会覆盖已有发行版。
 

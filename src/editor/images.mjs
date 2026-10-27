@@ -3,11 +3,12 @@ export class ImageProcessor {
     this.worker.onmessage = ({ data }) => { const p = this.pending.get(data.id); this.pending.delete(data.id); if (data.error) p?.reject(new Error(data.error)); else if (p) p.resolve(data.bitmap); else data.bitmap?.close(); };
     this.worker.onerror = () => { this.failed = true; for (const p of this.pending.values()) p.reject(new Error('图片处理失败，请重新打开应用')); this.pending.clear(); };
   }
-  process(page, maxSide = 1600, original = false) {
+  process(page, maxSide = 1600, original = false, outputWidth = null) {
     const snapshot = structuredClone(page);
-    const job = () => new Promise((resolve, reject) => { if (this.failed) { reject(new Error('图片处理进程已停止，请重新打开应用')); return; } const id = ++this.sequence; this.pending.set(id, { resolve, reject }); this.worker.postMessage({ id, page: snapshot, maxSide, original }); });
+    const job = () => new Promise((resolve, reject) => { if (this.failed) { reject(new Error('图片处理进程已停止，请重新打开应用')); return; } const id = ++this.sequence; this.pending.set(id, { resolve, reject }); this.worker.postMessage({ id, page: snapshot, maxSide, original, outputWidth }); });
     const next = this.queue.then(job, job); this.queue = next.catch(() => {}); return next;
   }
+  processForExport(page, settings) { return this.process(page, settings.width, false, settings.sizing === 'width' ? settings.width : null); }
   dispose() { this.worker.terminate(); for (const p of this.pending.values()) p.reject(new Error('处理已结束')); this.pending.clear(); }
 }
 export const loadImage = src => new Promise((resolve, reject) => { const image = new Image(); image.onload = () => resolve(image); image.onerror = () => reject(new Error('无法读取图片，请使用有效的 JPG、PNG 或 WebP 图片')); image.src = src; });

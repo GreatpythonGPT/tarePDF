@@ -5,6 +5,7 @@ import { createPDF, canvasBytes } from './export.mjs';
 import { demoImages, annotationDemoImages } from './demo.mjs';
 import { ANNOTATION_PRESETS, annotationDefaults } from './annotations.mjs';
 import { initAnnotationControls, renderAnnotationControls } from './annotation-controls.mjs';
+import { CollectionView } from './collection-view.mjs';
 
 const $ = id => document.getElementById(id);
 const api = window.studio;
@@ -13,6 +14,7 @@ let history = new History(project), revision = 0, dirty = false, importing = fal
 let imageTimer, draftTimer, propertyTimer, toastTimer, thumbTimer;
 let previewToken = 0, thumbsToken = 0, comparison = false, currentImageKey = null;
 let draggingPages = [], lastCheckedId = null;
+let workspaceView = 'edit', collectionMode = 'flow', exportPreviewToken = 0;
 const thumbnails = new Map(), processor = new ImageProcessor(), thumbnailProcessor = new ImageProcessor();
 const activePage = () => project.pages.find(p => p.id === activeId);
 const activeLayout = () => project.layouts[activePage()?.layoutId];
@@ -30,6 +32,59 @@ const editor = new CanvasEditor($('canvas-host'), {
   onChange(id, patch) { const e = activeLayout()?.elements.find(e => e.id === id); if (!e) return; patchElement(project, activePage().layoutId, id, patch); elementId = id; commit(); },
   onStatus(zoom) { $('zoom-fit').textContent = `${Math.round(zoom * 100)}% · 适应`; }
 });
+const collection = new CollectionView($('collection-scroll'), {
+  onSelect: switchPage,
+  onOpen(id) { activeId = id; setWorkspaceView('edit'); },
+  onCheck(id, checked, shift) { selectPageCheck(id, checked, shift); },
+  onStart(ids) { draggingPages = ids; }, getDragging: () => draggingPages,
+  onMove(ids, target, after) { reorderPages(project, ids, target, after); selected = new Set(ids); draggingPages = []; commit({ full: true }); },
+  onEnd() { draggingPages = []; }, onError(error) { toast(error.message, true); }
+});
+const exportCollection = new CollectionView($('export-collection-preview'), { onError(error) { toast(error.message, true); } }, false);
+function selectPageCheck(id, checked, shift) {
+  const index = project.pages.findIndex(p => p.id === id), start = project.pages.findIndex(p => p.id === lastCheckedId);
+  if (shift && start >= 0) for (let n = Math.min(start, index); n <= Math.max(start, index); n++) selected.add(project.pages[n].id);
+  else checked ? selected.add(id) : selected.delete(id);
+  lastCheckedId = id; renderSide(); renderInspector(); renderControls(); renderCollection();
+}
+function setWorkspaceView(view) {
+  finishPending(); workspaceView = view; comparison = false; elementId = null; editor.select(null, false);
+  document.querySelector('.workspace').dataset.mode = view;
+  $('collection-view').hidden = view !== 'collection'; $('collection-inspector').hidden = view !== 'collection';
+  $('view-edit').classList.toggle('active', view === 'edit'); $('view-collection').classList.toggle('active', view === 'collection');
+  if (view === 'collection') setSidebar('pages');
+  refresh();
+}
+function renderCollection() {
+  if (workspaceView !== 'collection') return;
+  collection.render(project, { activeId, selected, mode: collectionMode });
+  $('collection-empty').hidden = !!project.pages.length;
+  $('collection-count').textContent = `${project.pages.length} 张图片`;
+  $('collection-selected').textContent = `已选 ${selected.size} 张`;
+  $('collection-summary').textContent = `${project.export.sizing === 'width' ? `统一宽度 ${project.export.width} px` : '按图片原比例排列'} · 保留每张图片的比例${project.export.cover ? ' · 有开头标题条' : ''}${project.export.separator ? ' · 有图片间横条' : ''}`;
+}
+function renderOutputSettings() {
+  const settings = project.export;
+  for (const key of ['sizing', 'width', 'title', 'coverHeight', 'coverFontSize', 'coverAlign', 'coverColor', 'coverBackground', 'separatorHeight', 'separatorColor', 'background']) fieldValue(`collection-${key}`, settings[key]);
+  for (const key of ['cover', 'separator']) $(`collection-${key}`).checked = settings[key];
+  $('collection-title-fields').hidden = !settings.cover; $('collection-separator-fields').hidden = !settings.separator;
+  $('collection-width-label').textContent = settings.sizing === 'width' ? '统一宽度 · px' : '最长边 · px（0 为原始尺寸）';
+  $('collection-width').min = settings.sizing === 'width' ? '100' : '0';
+  document.querySelectorAll('[data-output-width]').forEach(b => b.classList.toggle('active', settings.sizing === 'width' && Number(b.dataset.outputWidth) === settings.width));
+  fieldValue('export-sizing', settings.sizing);
+  const select = $('export-width'); select.querySelectorAll('[data-custom]').forEach(o => o.remove());
+  if (![...select.options].some(o => Number(o.value) === settings.width)) { const option = document.createElement('option'); option.value = settings.width; option.textContent = `${settings.width} px · 自定义`; option.dataset.custom = 'true'; select.append(option); }
+  select.querySelector('option[value="0"]').disabled = settings.sizing === 'width';
+  fieldValue('export-width', settings.width); $('export-width-label').textContent = settings.sizing === 'width' ? '统一图片宽度' : '最长边清晰度';
+}
+function patchOutput(key, value, final = true) {
+  const ranges = { width: [100, 5000], coverHeight: [40, 5000], coverFontSize: [8, 500], separatorHeight: [1, 2000] };
+  if (ranges[key]) { if (!Number.isFinite(value)) return; const [min, max] = ranges[key]; value = key === 'width' && value === 0 && project.export.sizing === 'long-edge' ? 0 : Math.round(Math.max(min, Math.min(max, value))); }
+  project.export[key] = value;
+  if (key === 'sizing' && value === 'width' && !project.export.width) project.export.width = 1080;
+  if (final) commit(); else { renderCollection(); clearTimeout(propertyTimer); propertyTimer = setTimeout(() => commit(), 450); }
+  if ($('export-dialog').open) previewExport().catch(error => toast(error.message, true));
+}
 function markDirty() {
   revision++; dirty = true; api.setDirty(true); status('有新修改 · 正在自动保存');
   clearTimeout(draftTimer); const rev = revision;
@@ -42,15 +97,18 @@ function commit({ image = false, full = false } = {}) {
   clearTimeout(propertyTimer);
   if (history.commit(project)) markDirty();
   renderSide(); renderInspector(); renderControls();
-  if (full) showPage(); else { if (activeLayout()) editor.renderElements(activeLayout()); if (image) scheduleImage(); }
+  if (full) showPage(); else if (workspaceView === 'edit') { if (activeLayout()) editor.renderElements(activeLayout()); if (image) scheduleImage(); }
+  renderCollection();
   scheduleThumbnails();
 }
 function finishPending() { editor.finishText(); clearTimeout(propertyTimer); if (history.commit(project)) markDirty(); }
 function switchPage(id) {
   finishPending(); activeId = id; elementId = null; editor.select(null, false); showPage(); renderSide(); renderInspector(); renderControls();
+  renderCollection();
 }
 function showPage() {
   const p = activePage(); currentImageKey = null; previewToken++; clearTimeout(imageTimer);
+  if (workspaceView === 'collection') { editor.show(null, null); $('processing').hidden = true; return; }
   editor.show(p, p ? project.layouts[p.layoutId] : null, project.export.background);
   $('empty-state').hidden = !!p;
   $('active-name').textContent = p?.name || '你的下一份作品，从这里开始';
@@ -112,11 +170,7 @@ function renderSide() {
     const label = document.createElement('label'); label.className = 'page-check';
     const check = document.createElement('input'); check.type = 'checkbox'; check.checked = selected.has(p.id); check.setAttribute('aria-label', `选择页面 ${index + 1}`);
     label.addEventListener('click', event => event.stopPropagation());
-    check.addEventListener('click', event => {
-      if (event.shiftKey && lastCheckedId) { const start = project.pages.findIndex(page => page.id === lastCheckedId); for (let n = Math.min(start, index); n <= Math.max(start, index); n++) selected.add(project.pages[n].id); }
-      else check.checked ? selected.add(p.id) : selected.delete(p.id);
-      lastCheckedId = p.id; renderSide(); renderInspector(); renderControls();
-    }); label.append(check);
+    check.addEventListener('click', event => selectPageCheck(p.id, check.checked, event.shiftKey)); label.append(check);
     const caption = document.createElement('div'); caption.className = 'page-caption';
     const number = document.createElement('span'); number.className = 'page-number'; number.textContent = String(index + 1).padStart(2, '0');
     const name = document.createElement('span'); name.className = 'page-name'; name.textContent = p.name; name.title = p.name; caption.append(number, name);
@@ -138,7 +192,7 @@ function renderSide() {
     });
     card.addEventListener('drop', event => {
       if (!draggingPages.length) return; event.preventDefault(); event.stopPropagation();
-      reorderPages(project, draggingPages, p.id, card.classList.contains('drop-after')); draggingPages = []; commit({ full: true });
+      reorderPages(project, draggingPages, p.id, card.classList.contains('drop-after')); selected = new Set(draggingPages); draggingPages = []; commit({ full: true });
     });
     card.addEventListener('dragend', () => { draggingPages = []; document.querySelectorAll('.dragging,.drop-before,.drop-after').forEach(c => c.classList.remove('dragging', 'drop-before', 'drop-after')); });
     card.addEventListener('click', () => switchPage(p.id)); card.addEventListener('keydown', e => { if (e.target === card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); switchPage(p.id); } });
@@ -148,6 +202,7 @@ function renderSide() {
 }
 function fieldValue(id, value) { const node = $(id); if (document.activeElement !== node) node.value = value; }
 function renderInspector() {
+  renderOutputSettings();
   const p = activePage(), e = activeElement(); const count = p ? linkedPages(project, p.layoutId).length : 0;
   $('linked-count').textContent = count;
   $('sharing-title').textContent = count > 1 ? `${count} 张图片，共享一套排版` : '一套排版，多张同步';
@@ -192,23 +247,26 @@ function renderInspector() {
 }
 function renderControls() {
   const p = activePage(); $('undo').disabled = !history.past.length; $('redo').disabled = !history.future.length;
+  $('collection-undo').disabled = !history.past.length; $('collection-redo').disabled = !history.future.length; $('collection-export').disabled = !p;
   for (const id of ['export-open', 'add-overlay', 'duplicate-page', 'page-up', 'page-down', 'compare', 'crop-ratio', 'rotate-image', 'reset-adjustments']) $(id).disabled = !p;
   $('delete-pages').disabled = !selected.size; $('copy-adjustments').disabled = !p || !selected.size;
   document.querySelectorAll('[data-add],[data-preset],[data-filter],[data-annotation]').forEach(b => { b.disabled = !p; });
   $('select-all').disabled = !project.pages.length;
 }
-function refresh() { fieldValue('project-name', project.name); showPage(); renderSide(); renderInspector(); renderControls(); scheduleThumbnails(); }
+function refresh() { fieldValue('project-name', project.name); showPage(); renderSide(); renderInspector(); renderControls(); renderCollection(); scheduleThumbnails(); }
 function updateElement(patch, final = true) {
   const e = activeElement(); if (!e || e.locked) return; patchElement(project, activePage().layoutId, e.id, patch);
   if (final) commit(); else { editor.renderElements(activeLayout()); clearTimeout(propertyTimer); propertyTimer = setTimeout(() => commit(), 450); }
 }
 function addElement(type) {
+  if (workspaceView !== 'edit') setWorkspaceView('edit');
   if (!activePage()) return; const e = newElement(type); activeLayout().elements.push(e); elementId = e.id; editor.selectedId = e.id; setInspector('layout'); commit();
 }
 function addAnnotation(preset, position) {
   if (!activePage() || !ANNOTATION_PRESETS.some(p => p.id === preset)) return;
   if (activeLayout().elements.length >= 500) { toast('当前排版已有 500 个元素，请先删除不需要的元素', true); return; }
   finishPending();
+  if (workspaceView !== 'edit') setWorkspaceView('edit');
   const e = { ...newElement('annotation'), annotation: annotationDefaults(preset), ...position };
   if (preset === 'dimension') e.text = '120 mm';
   if (!position) { const offset = activeLayout().elements.filter(e => e.type === 'annotation').length % 5 * 0.025; e.x += offset; e.y += offset; }
@@ -221,6 +279,7 @@ function deleteElement() { const e = activeElement(); if (!e || e.locked) return
 function duplicateElement() { const e = activeElement(); if (!e || e.locked) return; const copy = { ...clone(e), id: uid(), x: e.x + 0.025, y: e.y + 0.025 }; delete copy.sharedId; activeLayout().elements.push(copy); elementId = copy.id; editor.selectedId = copy.id; commit(); }
 function setInspector(tab) { document.querySelectorAll('[data-inspector]').forEach(b => b.classList.toggle('active', b.dataset.inspector === tab)); $('layout-inspector').hidden = tab !== 'layout'; $('image-inspector').hidden = tab !== 'image'; }
 function setSidebar(tab) {
+  if (tab !== 'pages' && workspaceView !== 'edit') setWorkspaceView('edit');
   document.querySelectorAll('[data-sidebar]').forEach(b => b.classList.toggle('active', b.dataset.sidebar === tab));
   for (const name of ['pages', 'templates', 'annotations']) $(`${name}-panel`).hidden = name !== tab;
 }
@@ -243,7 +302,7 @@ async function importFiles(files, overlay = false) {
       if (p && imported[0]) { const img = imported[0], e = { ...newElement('image'), src: img.src, w: 0.25, h: 0.25 * (img.height / img.width) * (pageSize(p).width / pageSize(p).height) }; project.layouts[p.layoutId].elements.push(e); if (pageId === activeId) { elementId = e.id; editor.selectedId = e.id; } commit(); }
     } else {
       const pages = imported.map(image => addPage(project, image));
-      if (pages.length) { activeId = pages[0].id; selected = new Set(pages.map(p => p.id)); elementId = null; commit({ full: true }); toast(`已添加 ${pages.length} 张图片`); }
+      if (pages.length) { activeId = pages[0].id; selected = new Set([pages[0].id]); elementId = null; setWorkspaceView('collection'); commit({ full: true }); toast(`已添加 ${pages.length} 张图片，可直接拖动排序`); }
     }
     if (errors.length) toast(errors.join('；'), true);
   } finally { importing = false; $('image-input').value = ''; $('overlay-input').value = ''; if (!dirty) status('作品已就绪'); }
@@ -264,14 +323,18 @@ async function saveProject(saveAs = false) {
 }
 async function replaceProject(next) {
   clearTimeout(draftTimer); clearTimeout(propertyTimer); finishPending(); clearTimeout(draftTimer);
-  await api.newProject(); project = next; history = new History(project); activeId = project.pages[0]?.id || null; selected = new Set(activeId ? [activeId] : []); elementId = null; thumbnails.clear(); editor.select(null, false); markDirty(); refresh();
+  await api.newProject(); project = next; history = new History(project); activeId = project.pages[0]?.id || null; selected = new Set(activeId ? [activeId] : []); elementId = null; thumbnails.clear(); collection.clear(); exportCollection.clear(); editor.select(null, false); markDirty(); refresh();
 }
 function confirmDiscard() { return !dirty || window.confirm('当前作品有未保存的修改。继续会替换当前画布；如需保留，请先“保存作品”。'); }
 async function previewExport() {
   const p = activePage(); if (!p) return;
+  const token = ++exportPreviewToken;
+  $('export-preview-image').hidden = workspaceView === 'collection'; $('export-collection-preview').hidden = workspaceView !== 'collection';
+  $('export-preview-caption').textContent = workspaceView === 'collection' ? '整组 PDF 顺序预览' : '当前图片预览 · 标题与横条见整组编排';
+  if (workspaceView === 'collection') { exportCollection.render(project, { ids: project.export.scope === 'selected' ? [...selected] : null }); return; }
   const snapshot = clone(project), page = snapshot.pages.find(x => x.id === p.id);
   const bitmap = await processor.process(page, 900);
-  try { const canvas = await composeCanvas(page, snapshot.layouts[page.layoutId], bitmap, snapshot.export.background); $('export-preview-image').src = canvas.toDataURL('image/png'); canvas.width = 1; } finally { bitmap.close(); }
+  try { if (token !== exportPreviewToken) return; const canvas = await composeCanvas(page, snapshot.layouts[page.layoutId], bitmap, snapshot.export.background); if (token === exportPreviewToken) $('export-preview-image').src = canvas.toDataURL('image/png'); canvas.width = 1; } finally { bitmap.close(); }
 }
 async function openExport() {
   if (!activePage()) return; finishPending();
@@ -292,7 +355,7 @@ async function exportFile(format) {
     else {
       $('export-progress').textContent = '正在生成高清图片…';
       const exportProcessor = new ImageProcessor();
-      try { const bitmap = await exportProcessor.process(page, snapshot.export.width); try { const canvas = await composeCanvas(page, snapshot.layouts[page.layoutId], bitmap, snapshot.export.background); bytes = await canvasBytes(canvas); canvas.width = 1; } finally { bitmap.close(); } } finally { exportProcessor.dispose(); }
+      try { const bitmap = await exportProcessor.processForExport(page, snapshot.export); try { const canvas = await composeCanvas(page, snapshot.layouts[page.layoutId], bitmap, snapshot.export.background); bytes = await canvasBytes(canvas); canvas.width = 1; } finally { bitmap.close(); } } finally { exportProcessor.dispose(); }
     }
     const result = await api.saveExport(bytes, format, format === 'pdf' ? snapshot.name : page.name);
     $('export-progress').textContent = result.canceled ? '已取消保存，你的作品没有变化。' : `已导出：${result.name}`;
@@ -310,6 +373,22 @@ for (const [key, label] of Object.entries(adjustmentLabels)) {
   input.addEventListener('change', () => commit({ image: true })); field.append(row, input); $('adjustment-controls').append(field);
 }
 initAnnotationControls({ getElement: activeElement, onPatch: updateElement, onAdd: addAnnotation, onPalette: () => setSidebar('annotations') });
+bind('view-collection', () => setWorkspaceView('collection')); bind('view-edit', () => setWorkspaceView('edit'));
+for (const id of ['collection-import', 'collection-empty-import']) bind(id, () => $('image-input').click());
+bind('collection-export', () => { project.export.scope = 'all'; return openExport(); });
+bind('collection-undo', () => undo()); bind('collection-redo', () => undo(true));
+document.querySelectorAll('[data-collection-mode]').forEach(b => b.addEventListener('click', () => { collectionMode = b.dataset.collectionMode; document.querySelectorAll('[data-collection-mode]').forEach(x => x.classList.toggle('active', x === b)); renderCollection(); }));
+document.querySelectorAll('[data-output-width]').forEach(b => b.addEventListener('click', () => { project.export.sizing = 'width'; patchOutput('width', Number(b.dataset.outputWidth)); }));
+for (const key of ['sizing', 'coverAlign', 'width', 'coverHeight', 'coverFontSize', 'separatorHeight', 'cover', 'separator']) bind(`collection-${key}`, event => {
+  const node = event.target, value = node.type === 'checkbox' ? node.checked : node.type === 'number' ? node.valueAsNumber : node.value;
+  if (node.type === 'number' && !Number.isFinite(value)) { node.value = project.export[key]; return; }
+  patchOutput(key, value); if (node.type === 'number') node.value = project.export[key];
+}, 'change');
+bind('collection-title', event => patchOutput('title', event.target.value, false), 'input');
+for (const key of ['coverColor', 'coverBackground', 'separatorColor', 'background']) {
+  bind(`collection-${key}`, event => patchOutput(key, event.target.value, false), 'input');
+  bind(`collection-${key}`, event => patchOutput(key, event.target.value), 'change');
+}
 document.querySelectorAll('[data-sidebar]').forEach(b => b.addEventListener('click', () => setSidebar(b.dataset.sidebar)));
 document.querySelectorAll('[data-inspector]').forEach(b => b.addEventListener('click', () => setInspector(b.dataset.inspector)));
 document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addElement(b.dataset.add)));
@@ -320,7 +399,7 @@ document.querySelectorAll('[data-filter]').forEach(b => b.addEventListener('clic
 }));
 bind('import-images', () => $('image-input').click()); bind('empty-import', () => $('image-input').click()); bind('add-overlay', () => $('overlay-input').click());
 bind('image-input', event => importFiles([...event.target.files]), 'change'); bind('overlay-input', event => importFiles([...event.target.files], true), 'change');
-bind('select-all', event => { selected = new Set(event.target.checked ? project.pages.map(p => p.id) : []); renderSide(); renderInspector(); renderControls(); }, 'change');
+bind('select-all', event => { selected = new Set(event.target.checked ? project.pages.map(p => p.id) : []); renderSide(); renderInspector(); renderControls(); renderCollection(); }, 'change');
 bind('link-pages', () => { if (!activePage()) return; finishPending(); linkPages(project, activeId, [...selected]); commit(); toast(`已共享排版，${linkedPages(project, activePage().layoutId).length} 页会同步更新；可撤销`); });
 bind('detach-page', () => { if (!activePage()) return; detachPages(project, [activeId]); commit(); toast('当前页已独立，后续修改只影响这一页'); });
 bind('page-up', () => { movePage(project, activeId, -1); commit({ full: true }); }); bind('page-down', () => { movePage(project, activeId, 1); commit({ full: true }); });
@@ -355,9 +434,9 @@ for (const event of ['pointerup', 'pointercancel', 'lostpointercapture', 'blur']
 bind('compare', event => { if ([' ', 'Enter'].includes(event.key)) { event.preventDefault(); comparison = true; scheduleImage(true); } }, 'keydown'); bind('compare', endComparison, 'keyup');
 bind('project-name', event => { project.name = event.target.value.slice(0, 100); clearTimeout(propertyTimer); propertyTimer = setTimeout(() => commit(), 450); }, 'input');
 bind('save-project', () => saveProject());
-bind('open-project', async () => { if (importing || !confirmDiscard()) return; const result = await api.openProject(); if (!result) return; const next = validateProject(JSON.parse(result.json)); await replaceProject(next); dirty = false; api.setDirty(false); status(`已打开：${result.name}`); });
-bind('new-project', async () => { if (!importing && confirmDiscard()) await replaceProject(createProject()); });
-bind('demo-load', async () => { if (importing) return; importing = true; $('demo-load').disabled = true; try { const next = createProject(); next.name = '光与空间 · 设计作品集'; const images = await demoImages(); const pages = images.map(image => addPage(next, image)); next.layouts[pages[0].layoutId].elements = presetElements('editorial'); linkPages(next, pages[0].id, pages.map(p => p.id)); await replaceProject(next); selected = new Set(pages.map(p => p.id)); renderSide(); renderInspector(); toast('试着改一处标题，看看 3 张图片一起更新'); } finally { importing = false; $('demo-load').disabled = false; } });
+bind('open-project', async () => { if (importing || !confirmDiscard()) return; const result = await api.openProject(); if (!result) return; const next = validateProject(JSON.parse(result.json)); await replaceProject(next); setWorkspaceView(project.pages.length ? 'collection' : 'edit'); dirty = false; api.setDirty(false); status(`已打开：${result.name}`); });
+bind('new-project', async () => { if (!importing && confirmDiscard()) { await replaceProject(createProject()); setWorkspaceView('edit'); } });
+bind('demo-load', async () => { if (importing) return; importing = true; $('demo-load').disabled = true; try { const next = createProject(); next.name = '光与空间 · 设计作品集'; const images = await demoImages(); const pages = images.map(image => addPage(next, image)); next.layouts[pages[0].layoutId].elements = presetElements('editorial'); linkPages(next, pages[0].id, pages.map(p => p.id)); await replaceProject(next); setWorkspaceView('edit'); selected = new Set(pages.map(p => p.id)); renderSide(); renderInspector(); toast('试着改一处标题，看看 3 张图片一起更新'); } finally { importing = false; $('demo-load').disabled = false; } });
 bind('annotation-demo', async () => {
   if (importing || (project.pages.length && !confirmDiscard())) return;
   importing = true; $('annotation-demo').disabled = true;
@@ -377,19 +456,17 @@ bind('annotation-demo', async () => {
       text('TARE STUDIO  /  产品示意 · 尺寸为演示文字', 0.06, 0.945, 0.011, { fill: '#929782' })
     ];
     linkPages(next, pages[0].id, pages.map(p => p.id)); await replaceProject(next);
+    setWorkspaceView('edit');
     selected = new Set(pages.map(p => p.id)); elementId = activeLayout().elements[4].id; editor.selectedId = elementId;
     setSidebar('annotations'); setInspector('layout'); commit(); $('element-properties').scrollIntoView({ block: 'start' });
     toast('三款配色共用标注，试着调整角度或修改说明文字');
   } finally { importing = false; $('annotation-demo').disabled = false; }
 });
 bind('help-open', () => $('help-dialog').showModal()); bind('export-open', openExport); bind('export-pdf', () => exportFile('pdf')); bind('export-png', () => exportFile('png'));
-for (const [id, key, type] of [['export-scope', 'scope', 'string'], ['export-width', 'width', 'number'], ['export-background', 'background', 'string'], ['export-cover', 'cover', 'boolean'], ['export-separator', 'separator', 'boolean'], ['export-title', 'title', 'string']]) bind(id, async event => {
-  project.export[key] = type === 'boolean' ? event.target.checked : type === 'number' ? Number(event.target.value) : event.target.value;
+for (const [id, key, type] of [['export-scope', 'scope', 'string'], ['export-sizing', 'sizing', 'string'], ['export-width', 'width', 'number'], ['export-background', 'background', 'string'], ['export-cover', 'cover', 'boolean'], ['export-separator', 'separator', 'boolean'], ['export-title', 'title', 'string']]) bind(id, async event => {
+  patchOutput(key, type === 'boolean' ? event.target.checked : type === 'number' ? Number(event.target.value) : event.target.value, id !== 'export-title');
   $('export-title').disabled = !project.export.cover;
-  // Update state immediately so a fast click on export always uses the latest value.
-  if (id === 'export-title') { clearTimeout(propertyTimer); propertyTimer = setTimeout(() => commit(), 450); }
-  else commit();
-  if (key === 'background') { editor.background.fill(project.export.background); editor.layer.batchDraw(); await previewExport(); }
+  if (key === 'background') { editor.background.fill(project.export.background); editor.layer.batchDraw(); }
 }, id === 'export-title' ? 'input' : 'change');
 document.addEventListener('keydown', safe(event => {
   const modifier = event.ctrlKey || event.metaKey, key = event.key.toLowerCase();
@@ -402,7 +479,7 @@ document.addEventListener('keydown', safe(event => {
   else if (event.key === 'Escape') { elementId = null; editor.select(null, false); renderInspector(); }
   else if (event.key.startsWith('Arrow')) { const e = activeElement(), p = activePage(); if (!e || !p || e.locked) return; event.preventDefault(); const distance = (event.shiftKey ? 10 : 1) / 1000; const patch = {}; if (event.key === 'ArrowLeft') patch.x = e.x - distance; if (event.key === 'ArrowRight') patch.x = e.x + distance; if (event.key === 'ArrowUp') patch.y = e.y - distance * pageSize(p).width / pageSize(p).height; if (event.key === 'ArrowDown') patch.y = e.y + distance * pageSize(p).width / pageSize(p).height; updateElement(patch); }
 }));
-document.addEventListener('dragover', event => { if (event.dataTransfer.types.includes('Files')) { event.preventDefault(); $('canvas-area').classList.add('drop-active'); } });
+document.addEventListener('dragover', event => { if (event.dataTransfer.types.includes('Files')) { event.preventDefault(); $('canvas-area').classList.add('drop-active'); $('collection-view').classList.add('drop-active'); } });
 $('canvas-host').addEventListener('dragover', event => {
   if (!event.dataTransfer.types.includes('application/x-tare-annotation') || !activePage()) return;
   event.preventDefault(); event.stopPropagation(); event.dataTransfer.dropEffect = 'copy'; $('canvas-area').classList.add('drop-annotation');
@@ -415,14 +492,14 @@ $('canvas-host').addEventListener('drop', safe(event => {
   const position = editor.dropPosition(event.clientX, event.clientY);
   if (position) addAnnotation(preset, position); else toast('请把标注拖到图片内，落点就是指示端的位置');
 }));
-document.addEventListener('dragleave', event => { if (!event.relatedTarget) $('canvas-area').classList.remove('drop-active'); });
-document.addEventListener('drop', safe(async event => { event.preventDefault(); $('canvas-area').classList.remove('drop-active'); if (document.querySelector('dialog[open]')) return; await importFiles([...event.dataTransfer.files]); }));
-document.addEventListener('paste', safe(async event => { if (isEditable(event.target) || document.querySelector('dialog[open]')) return; const files = [...(event.clipboardData?.files || [])]; if (files.length) { event.preventDefault(); await importFiles(files, !!activePage()); } }));
+document.addEventListener('dragleave', event => { if (!event.relatedTarget) { $('canvas-area').classList.remove('drop-active'); $('collection-view').classList.remove('drop-active'); } });
+document.addEventListener('drop', safe(async event => { event.preventDefault(); $('canvas-area').classList.remove('drop-active'); $('collection-view').classList.remove('drop-active'); if (document.querySelector('dialog[open]')) return; await importFiles([...event.dataTransfer.files]); }));
+document.addEventListener('paste', safe(async event => { if (isEditable(event.target) || document.querySelector('dialog[open]')) return; const files = [...(event.clipboardData?.files || [])]; if (files.length) { event.preventDefault(); await importFiles(files, workspaceView === 'edit' && !!activePage()); } }));
 
 async function init() {
   await document.fonts.load('400 16px "Noto Sans SC"'); await document.fonts.load('700 16px "Noto Sans SC"');
   try { const draft = await api.loadDraft(); if (draft) { project = validateProject(JSON.parse(draft)); history.reset(project); activeId = project.pages[0]?.id || null; selected = new Set(activeId ? [activeId] : []); dirty = true; api.setDirty(true); status('已恢复上次工作 · 请保存作品'); } }
   catch (error) { toast(`自动恢复文件不可用：${error.message}`, true); }
-  refresh(); document.body.dataset.ready = 'true';
+  if (project.pages.length) setWorkspaceView('collection'); else refresh(); document.body.dataset.ready = 'true';
 }
 init().catch(error => { console.error(error); toast(`启动失败：${error.message}`, true); });

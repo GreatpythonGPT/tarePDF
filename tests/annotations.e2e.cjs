@@ -36,7 +36,7 @@ async function check(name, run) { await run(); checks.push(name); console.log('�
     const doc = await saved(); assert.equal(new Set(doc.pages.map(p => p.layoutId)).size, 1); assert.equal(firstElements(doc).filter(e => e.type === 'annotation').length, 4);
     await fs.copyFile(projectFile, path.join(output, '弧光·可编辑标注示例.tare'));
     await page.locator('#toast').evaluate(e => { e.hidden = true; }); await page.screenshot({ path: path.join(output, '01-annotation-editor.png') });
-    await page.click('#export-open'); await page.waitForFunction(() => document.querySelector('#export-preview-image').src.startsWith('data:'));
+    await page.click('#export-open'); await page.selectOption('#export-width', '1600'); await page.waitForFunction(() => document.querySelector('#export-preview-image').src.startsWith('data:'));
     await page.click('#export-pdf'); await page.waitForFunction(() => document.querySelector('#export-progress').textContent.startsWith('已导出'), undefined, { timeout: 60000 });
     assert.equal((await PDFDocument.load(await fs.readFile(pdfFile))).getPageCount(), 3);
     await page.click('#export-png'); await page.waitForFunction(() => document.querySelector('#export-progress').textContent.includes('.png'), undefined, { timeout: 60000 });

@@ -38,3 +38,9 @@ export function targetSize(width, height, maxSide, maxPixels = 24000000) {
   const scale = Math.min(1, maxSide ? maxSide / Math.max(width, height) : 1, Math.sqrt(maxPixels / (width * height)));
   return { width: Math.max(1, Math.floor(width * scale)), height: Math.max(1, Math.floor(height * scale)) };
 }
+export function uniformSize(width, height, outputWidth) {
+  if (!Number.isInteger(outputWidth) || outputWidth < 100 || outputWidth > 5000 || !(width > 0 && height > 0)) throw new Error('统一宽度应为 100–5000 px');
+  const outputHeight = Math.max(1, Math.round(outputWidth * height / width));
+  if (outputHeight > 32760 || outputWidth * outputHeight > 24000000) throw new Error('按此宽度输出的图片过长或过大，请降低统一宽度或先裁剪图片');
+  return { width: outputWidth, height: outputHeight };
+}

@@ -29,6 +29,7 @@ async function prepareRelease({ root, tag, testRoot }) {
   const version = releaseVersion(tag, pkg.version);
   await checkedRun(testRoot, 'latest.txt', 15);
   const annotations = await checkedRun(testRoot, 'latest-annotations.txt', 7);
+  const collection = await checkedRun(testRoot, 'latest-collection.txt', 8);
   const executable = path.join(root, 'dist', `Tare Studio ${version}.exe`);
   const handle = await fs.open(executable, 'r');
   try {
@@ -36,15 +37,19 @@ async function prepareRelease({ root, tag, testRoot }) {
     if (magic.toString() !== 'MZ') throw new Error('发行文件不是 Windows 可执行程序');
   } finally { await handle.close(); }
   const destination = path.join(root, 'dist', 'release');
+  await fs.rm(destination, { recursive: true, force: true });
   await fs.mkdir(destination, { recursive: true });
   const appName = `Tare-Studio-${version}-Windows-x64.exe`;
   const sampleName = `Tare-Studio-${version}-sample.tare`;
   const pdfName = `Tare-Studio-${version}-preview.pdf`;
-  const sources = [[executable, appName], [path.join(annotations, '弧光·可编辑标注示例.tare'), sampleName], [path.join(annotations, '标注预览.pdf'), pdfName]];
+  const collectionName = `Tare-Studio-${version}-collection.tare`, collectionPDF = `Tare-Studio-${version}-collection-preview.pdf`;
+  const sources = [[executable, appName], [path.join(annotations, '弧光·可编辑标注示例.tare'), sampleName], [path.join(annotations, '标注预览.pdf'), pdfName], [path.join(collection, '统一宽度编排示例.tare'), collectionName], [path.join(collection, '批量编排预览.pdf'), collectionPDF]];
   for (const [source, target] of sources) await fs.copyFile(source, path.join(destination, target));
   const instructions = `Tare Studio ${version} · Windows 便携版
 
 下载 ${appName}，双击运行，无需安装 Node.js 或下载源码。
+导入一批不同尺寸图片后，自动进入“整组编排”：统一宽度、拖动排序，在右侧设置开头标题条和图片间横条。
+可在“连续预览”和“缩略图排序”之间切换，点击“编辑此图”继续文字与标注编辑。
 打开“标注 → 体验产品标注示例”，即可尝试三张图片同步修改。
 
 六种标注：直线、箭头、斜折线、直角、双向尺寸线、编号指示。
@@ -52,6 +57,7 @@ async function prepareRelease({ root, tag, testRoot }) {
 “保存作品”保留全部可编辑内容；“导出作品”生成 PDF 或 PNG。
 ${sampleName} 是可编辑示例，用程序顶部“打开作品”打开。
 ${pdfName} 可以直接查看效果。
+${collectionName} 是批量图片编排示例，${collectionPDF} 是对应的 PDF 效果。
 
 源码与自动生成的 Source code.zip 供开发使用，普通用户只需下载 .exe。
 此版本没有代码签名。作品保存在本地；建议保留独立的 .tare 文件作为备份。
@@ -65,10 +71,14 @@ ${pdfName} 可以直接查看效果。
 
 **Windows 用户请在下方 Assets 下载 \`${appName}\`，双击运行。无需下载源码或安装 Node.js。**
 
-打开“标注 → 体验产品标注示例”，即可试用三张图片同步修改。
+导入一批不同尺寸的图片，就会自动进入“整组编排”。在右侧设统一宽度、开头标题条和图片间横条；拖动图片调整顺序，勾选多张可以一起移动。
+
+需要细修某张图时点“编辑此图”；文字排版和模板标注仍然保留。
 
 ## 这个版本可以做什么
 
+- 批量图片统一宽度（100–5000 px），按原比例排列；连续预览和缩略图排序。
+- 可调高度、颜色、字号、对齐和文字的开头标题条；可调高度、颜色的图片间横条。
 - 直线、箭头、折线、直角、双向尺寸线、编号等六种可拖入标注。
 - 分别调整角度、斜段长度、横段长度、端点、线型和文字位置。
 - 可编辑文字排版、图片调色与裁剪，多张图共享整套排版或单个元素。
@@ -79,10 +89,12 @@ ${pdfName} 可以直接查看效果。
 - \`${appName}\`：Windows x64 应用程序。
 - \`${sampleName}\`：可编辑的产品标注示例。
 - \`${pdfName}\`：效果预览。
+- \`${collectionName}\`：可编辑的批量图片编排示例。
+- \`${collectionPDF}\`：统一宽度、标题条和分隔横条的 PDF 预览。
 - \`README-Windows.txt\`：中文使用说明。
 - \`SHA256SUMS.txt\`：附件校验值。
 
-发行流程在 Windows 环境构建并运行打包程序的交互测试，通过后才公开附件。此便携版尚未进行代码签名。
+发行流程在 Windows 环境构建并运行单图编辑、模板标注、整组编排三套交互测试，通过后才公开附件。此便携版尚未进行代码签名。
 `;
   await fs.writeFile(path.join(destination, 'release-notes.md'), notes);
   return { version, tag, destination, assets: [...assets, 'SHA256SUMS.txt'] };

@@ -81,7 +81,7 @@ async function check(name, run) { await run(); checks.push(name); console.log('�
    await page.click('#export-open');await page.waitForFunction(()=>document.querySelector('#export-preview-image').src.startsWith('data:'));
    await page.check('#export-cover');await page.fill('#export-title','光与空间\n我的设计作品集');await page.check('#export-separator');await page.selectOption('#export-width','1600');
    await page.screenshot({path:path.join(output,'03-export.png')});await page.click('#export-pdf');await page.waitForFunction(()=>document.querySelector('#export-progress').textContent.startsWith('已导出'),undefined,{timeout:60000});
-   const bytes=await fs.readFile(pdfFile),pdf=await PDFDocument.load(bytes);assert.equal(pdf.getPageCount(),6);assert.deepEqual(pdf.getPages().map(p=>[p.getWidth(),p.getHeight()]),[[720,504],[720,495],[720,72],[720,495],[720,72],[720,495]]);
+   const bytes=await fs.readFile(pdfFile),pdf=await PDFDocument.load(bytes);assert.equal(pdf.getPageCount(),6);assert.deepEqual(pdf.getPages().map(p=>[p.getWidth(),p.getHeight()]),[[720,225],[720,495],[720,45],[720,495],[720,45],[720,495]]);
    await page.click('#export-png');await page.waitForFunction(()=>document.querySelector('#export-progress').textContent.includes('.png'),undefined,{timeout:60000});const png=await fs.readFile(pngFile);assert.equal(png.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(png.readUInt32BE(16),1600);assert.equal(png.readUInt32BE(20),1100);
  });
  await check('导出取消不报成功，快速双击不重复导出',async()=>{
@@ -96,7 +96,7 @@ async function check(name, run) { await run(); checks.push(name); console.log('�
    const after=await saved();assert.deepEqual(after,before);
  });
  await check('仅共享选定元素，独立页面原有标题保留且修改同步',async()=>{
-   await pageCard(0).click();await page.click('[data-add="arrow"]');await page.click('#select-all');if(!(await page.locator('#select-all').isChecked()))await page.click('#select-all');
+   await pageCard(0).click();await page.click('#view-edit');await page.click('[data-add="arrow"]');await page.click('#select-all');if(!(await page.locator('#select-all').isChecked()))await page.click('#select-all');
    await page.click('#share-element');await page.fill('#element-rotation','25');await page.locator('#element-rotation').press('Tab');
    const doc=await saved();const [a,b]=doc.pages;assert.notEqual(a.layoutId,b.layoutId);const shared=doc.layouts[a.layoutId].elements.find(e=>e.type==='arrow'&&e.sharedId);assert(shared);
    assert.equal(doc.layouts[b.layoutId].elements.find(e=>e.sharedId===shared.sharedId).rotation,25);assert(doc.layouts[b.layoutId].elements.some(e=>e.text==='第二页的独立标题'));
@@ -108,9 +108,9 @@ async function check(name, run) { await run(); checks.push(name); console.log('�
    const files=[path.join(output,'横向.png'),path.join(output,'竖向.png')];for(let i=0;i<2;i++)await fs.writeFile(files[i],Buffer.from(fixtures[i],'base64'));
    await page.setInputFiles('#image-input',files);await page.waitForFunction(()=>document.querySelectorAll('.page-card').length===5);await waitImage();
    let doc=await saved();assert.deepEqual(doc.pages.slice(-2).map(p=>[p.width,p.height]),[[160,80],[80,160]]);
-   await page.setInputFiles('#overlay-input',files[1]);await page.waitForFunction(()=>document.querySelector('#element-title').textContent.includes('贴图'));
+   await page.click('#view-edit');await page.setInputFiles('#overlay-input',files[1]);await page.waitForFunction(()=>document.querySelector('#element-title').textContent.includes('贴图'));
    doc=await saved();assert(doc.layouts[doc.pages[3].layoutId].elements.some(e=>e.type==='image'));
-   const movedIds=doc.pages.slice(-2).map(p=>p.id);await pageCard(3).dragTo(pageCard(0),{targetPosition:{x:80,y:10}});doc=await saved();assert.deepEqual(doc.pages.slice(0,2).map(p=>p.id),movedIds);
+   const movedIds=doc.pages.slice(-2).map(p=>p.id);await pageCard(4).locator('input[type=checkbox]').check();await pageCard(3).scrollIntoViewIfNeeded();let sourceBox=await pageCard(3).boundingBox();await page.mouse.move(sourceBox.x+80,sourceBox.y+40);await page.mouse.down();await page.mouse.move(sourceBox.x+90,sourceBox.y+50,{steps:3});await pageCard(0).evaluate(e=>e.scrollIntoView({block:'start'}));const targetBox=await pageCard(0).boundingBox();await page.mouse.move(targetBox.x+80,targetBox.y+10,{steps:10});await page.mouse.up();doc=await saved();assert.deepEqual(doc.pages.slice(0,2).map(p=>p.id),movedIds);
    await page.click('#undo');doc=await saved();assert.deepEqual(doc.pages.slice(-2).map(p=>p.id),movedIds);
  });
  await check('关闭再启动，恢复未手动保存的编辑和共享关系',async()=>{

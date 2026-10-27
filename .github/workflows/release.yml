@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing version tag, for example v2.1.0'
+        description: 'Existing version tag, for example v2.2.0'
         required: true
         type: string
 
@@ -54,6 +54,10 @@ jobs:
         env:
           TAREPDF_EXECUTABLE: ${{ github.workspace }}/dist/win-unpacked/Tare Studio.exe
         run: node tests/annotations.e2e.cjs
+      - name: Test batch composition on Windows
+        env:
+          TAREPDF_EXECUTABLE: ${{ github.workspace }}/dist/win-unpacked/Tare Studio.exe
+        run: node tests/collection.e2e.cjs
       - name: Prepare application, examples and checksums
         run: node scripts/release.cjs prepare
       - name: Preserve test results
