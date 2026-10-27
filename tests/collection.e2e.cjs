@@ -116,4 +116,13 @@ async function check(name, run) { await run(); checks.push(name); console.log('�
     await page.locator('.inspector-scroll').evaluate(e => { e.scrollTop = 0; }); await page.screenshot({ path: path.join(output, '03-small-window.png') }); assert.deepEqual(errors, []);
   });
   await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ status: 'passed', checks, errors }, null, 2)); await fs.writeFile(path.join(root, 'latest-collection.txt'), output + '\n'); console.log('Artifacts:', output);
-})().catch(async error => { console.error(error); if (page) await page.screenshot({ path: path.join(output || root, 'failure.png') }).catch(() => {}); process.exitCode = 1; }).finally(async () => { if (app) { await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().forEach(w => w.removeAllListeners('close'))).catch(() => {}); await app.close(); } });
+})().catch(async error => {
+  console.error(error);
+  if (process.env.GITHUB_ACTIONS) {
+    const detail = `已通过 ${checks.length} 组整组编排检查\n${error.stack || error.message}`.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
+    console.log(`::error title=整组编排交互检查失败::${detail}`);
+  }
+  if (output) await fs.writeFile(path.join(output, 'results.json'), JSON.stringify({ status: 'failed', checks, errors: [...errors, error.stack || error.message] }, null, 2)).catch(() => {});
+  if (page) await page.screenshot({ path: path.join(output || root, 'failure.png') }).catch(() => {});
+  process.exitCode = 1;
+}).finally(async () => { if (app) { await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows().forEach(w => w.removeAllListeners('close'))).catch(() => {}); await app.close(); } });
