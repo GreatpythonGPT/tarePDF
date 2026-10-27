@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; worker-src 'self'; connect-src 'self' data: blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Tare Studio · 图片编排</title><link rel="stylesheet" href="./style.css"><script src="./app.js" defer></script></head>
+<body>
+<svg class="svg-defs" aria-hidden="true"><defs>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.5"/><path d="m3 17 6-6 4 4 3-3 5 5"/></symbol>
+<symbol id="i-text" viewBox="0 0 24 24"><path d="M4 6V4h16v2M12 4v16M8 20h8"/></symbol>
+<symbol id="i-rect" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/></symbol>
+<symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="m8 4-5 5 5 5M3 9h11a6 6 0 0 1 0 12h-3"/></symbol>
+<symbol id="i-redo" viewBox="0 0 24 24"><path d="m16 4 5 5-5 5M21 9H10a6 6 0 0 0 0 12h3"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="m10 8 3-3a4 4 0 0 1 6 6l-3 3M14 16l-3 3a4 4 0 0 1-6-6l3-3M8 16l8-8"/></symbol>
+<symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="8" cy="7" r="3"/><circle cx="16" cy="17" r="3"/></symbol>
+</defs></svg>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">t</span><strong>tare<span>studio</span></strong><span class="beta-label">图片编排</span></div>
+  <div class="project-heading"><input id="project-name" aria-label="作品名称" maxlength="100" value="未命名作品"><span id="save-status" role="status">本地创作，安心保存</span></div>
+  <div class="header-actions"><button id="new-project" class="quiet">新建</button><button id="open-project" class="quiet">打开作品</button><span class="divider"></span><button id="save-project" class="secondary">保存作品</button><button id="export-open" class="primary"><svg><use href="#i-download"/></svg>导出作品</button></div>
+</header>
+<div class="workspace">
+  <aside class="left-panel">
+    <div class="panel-tabs"><button data-sidebar="pages" class="active">页面 <span id="page-count">0</span></button><button data-sidebar="annotations">标注</button><button data-sidebar="templates">排版</button></div>
+    <section id="pages-panel" class="left-content">
+      <button id="import-images" class="import-button"><svg><use href="#i-plus"/></svg>添加图片</button>
+      <div class="selection-row"><label><input type="checkbox" id="select-all"> 全选页面</label><span id="selection-count">已选 0 张</span></div>
+      <div id="pages-list" class="pages-list" aria-label="作品页面"></div>
+      <div class="page-actions"><button id="page-up" title="当前页面前移" aria-label="当前页面前移">↑</button><button id="page-down" title="当前页面后移" aria-label="当前页面后移">↓</button><button id="duplicate-page" title="复制当前页（独立排版）" aria-label="复制当前页"><svg><use href="#i-copy"/></svg></button><button id="delete-pages" class="danger-text" title="删除勾选的页面" aria-label="删除勾选页面"><svg><use href="#i-trash"/></svg></button></div>
+    </section>
+    <section id="templates-panel" class="left-content" hidden>
+      <p class="panel-intro">从一个好看的起点开始。<br>排版可以继续编辑、跨页同步。</p>
+      <button class="preset-card" data-preset="editorial"><span class="preset-preview editorial"><i></i><b>让灵感，<br>有处安放</b><small>DESIGN COLLECTION</small></span><span>杂志封面 <em>标题 · 信息条</em></span></button>
+      <button class="preset-card" data-preset="minimal"><span class="preset-preview minimal"><b>日常之外</b><small>A QUIET PERSPECTIVE</small><i></i></span><span>留白叙事 <em>简洁 · 作品集</em></span></button>
+      <button class="preset-card" data-preset="annotation"><span class="preset-preview annotation"><i>↗</i><b>看见设计细节</b></span><span>细节标注 <em>箭头 · 说明</em></span></button>
+      <p class="tiny-note">点选排版会添加到当前画布，已有元素会保留。可随时撤销。</p>
+    </section>
+    <section id="annotations-panel" class="left-content" hidden>
+      <div class="annotation-intro"><span>细节，由你指明</span><h2>标注工具箱</h2><p>点选添加，或拖到要指示的位置。<br>线条与文字一起移动、一起同步。</p></div>
+      <div id="annotation-library" class="annotation-library"></div>
+      <button id="annotation-demo" class="secondary full-width annotation-demo-button">体验产品标注示例 ↗</button>
+      <div class="annotation-tip"><b>每个标注，都可以再调整</b><p>在右侧设置角度、各段长度和端点；文字可在线上、线下或末端。</p><p>尺寸线的数值由你填写，不会自动测量图片里的实物。</p></div>
+    </section>
+    <div class="sidebar-bottom"><span class="privacy-dot"></span>所有创作留在你的电脑上<button id="help-open" aria-label="使用帮助">?</button></div>
+  </aside>
+  <main class="editor-main">
+    <div class="canvas-toolbar"><div class="tool-group">
+      <button data-add="text"><svg><use href="#i-text"/></svg><span>文字</span></button>
+      <button data-add="rect"><svg><use href="#i-rect"/></svg><span>矩形</span></button>
+      <button data-add="ellipse"><svg><use href="#i-circle"/></svg><span>圆形</span></button>
+      <button data-add="arrow"><svg><use href="#i-arrow"/></svg><span>箭头</span></button>
+      <button id="annotation-open" class="annotation-tool"><svg><use href="#i-link"/></svg><span>标注</span></button>
+      <button id="add-overlay"><svg><use href="#i-image"/></svg><span>贴图</span></button>
+    </div><div class="tool-group history-tools"><button id="undo" aria-label="撤销" title="撤销 Ctrl+Z"><svg><use href="#i-undo"/></svg></button><button id="redo" aria-label="重做" title="重做 Ctrl+Shift+Z"><svg><use href="#i-redo"/></svg></button></div></div>
+    <div class="canvas-meta"><span id="active-name">你的下一份作品，从这里开始</span><span id="canvas-badge" class="scope-badge" hidden><svg><use href="#i-link"/></svg><span></span></span></div>
+    <div id="canvas-area" class="canvas-area"><div id="canvas-host"></div>
+      <div id="empty-state" class="empty-state"><div class="empty-art"><span class="art-back"></span><span class="art-front"><i></i><b>创造，<br>属于你的表达。</b><small>YOUR NEXT GREAT IDEA</small></span></div><h1>让每一张图，都有表达</h1><p>调好图片，排好文字，把灵感连成一组作品。<br>支持 JPG、PNG、WebP，也可以直接拖入图片。</p><div><button id="empty-import" class="primary"><svg><use href="#i-plus"/></svg>导入我的图片</button><button id="demo-load" class="secondary">体验示例作品 ↗</button></div><span class="empty-footnote">可编辑文字与标注 · 多页共享排版 · 高清 PDF 导出</span></div>
+      <div id="processing" class="processing" hidden>正在更新图片…</div>
+    </div>
+    <footer class="canvas-footer"><span id="page-info">准备好开始创作</span><button id="compare" title="按住查看未调色图片"><svg><use href="#i-eye"/></svg>按住看原图</button><div class="zoom"><button id="zoom-out" aria-label="缩小画布">−</button><button id="zoom-fit" title="适应窗口">适应</button><button id="zoom-in" aria-label="放大画布">＋</button></div></footer>
+  </main>
+  <aside class="right-panel">
+    <div class="panel-tabs"><button data-inspector="layout" class="active">排版与元素</button><button data-inspector="image">图片调整</button></div>
+    <div class="inspector-scroll">
+      <section class="sharing-card"><div class="section-heading"><svg><use href="#i-link"/></svg><strong id="sharing-title">一套排版，多张同步</strong><span id="linked-count">0</span></div><p id="sharing-description">勾选左侧的页面，把当前排版共享给它们。</p><button id="link-pages" class="primary">让勾选页面共用当前排版</button><button id="detach-page" class="text-button">解除当前页的共享，单独编辑</button></section>
+      <div id="layout-inspector">
+        <section id="element-empty" class="inspector-empty"><div>↖</div><strong>选中元素，调整细节</strong><p>从上方添加文字、箭头或图形。<br>在画布上拖动，双击文字即可编辑。</p></section>
+        <section id="element-properties" class="property-section" hidden>
+          <div class="section-heading"><strong id="element-title">文字属性</strong><span id="element-scope">当前页</span></div>
+          <div id="annotation-fields" hidden>
+            <div class="field-row"><label class="field">标注样式<select id="annotation-preset"></select></label><label class="field">延伸方向<select id="annotation-direction"><option value="up-right">↗ 右上</option><option value="up-left">↖ 左上</option><option value="down-right">↘ 右下</option><option value="down-left">↙ 左下</option></select></label></div>
+            <div class="annotation-parameter"><label for="annotation-angle">线段角度</label><div class="parameter-value"><input id="annotation-angle" type="number" step="1"><span>°</span></div><input id="annotation-angle-range" type="range" step="1" aria-label="线段角度滑块"></div>
+            <div class="angle-shortcuts" aria-label="常用角度"><button data-annotation-angle="0">0°</button><button data-annotation-angle="30">30°</button><button data-annotation-angle="45">45°</button><button data-annotation-angle="60">60°</button><button data-annotation-angle="90">90°</button></div>
+            <div class="annotation-parameter"><label id="annotation-length-title" for="annotation-length">斜 / 竖段长度</label><div class="parameter-value"><input id="annotation-length" type="number" step="1"></div><input id="annotation-length-range" type="range" step="1" aria-label="第一段长度滑块"></div>
+            <div id="annotation-tail-field" class="annotation-parameter"><label for="annotation-tailLength">横段长度</label><div class="parameter-value"><input id="annotation-tailLength" type="number" step="1"></div><input id="annotation-tailLength-range" type="range" step="1" aria-label="横段长度滑块"></div>
+            <p class="tiny-note annotation-units">长度以画布宽 1000 为基准，换尺寸自动缩放。</p>
+            <details class="annotation-details"><summary>端点与线型</summary>
+              <div class="field-row"><label class="field">指示端<select id="annotation-startCap"><option value="dot">实心圆点</option><option value="ring">空心圆点</option><option value="arrow">箭头</option><option value="bar">短横杠</option><option value="number">编号圆点</option><option value="none">无端点</option></select></label><label class="field">线尾端<select id="annotation-endCap"><option value="none">无端点</option><option value="arrow">箭头</option><option value="dot">实心圆点</option><option value="ring">空心圆点</option><option value="bar">短横杠</option></select></label></div>
+              <div class="field-row"><label class="field">线型<select id="annotation-dash"><option value="solid">实线</option><option value="dashed">虚线</option><option value="dotted">点线</option></select></label><label class="field">端点大小<input id="annotation-capSize" type="number" step="1"></label></div>
+              <label id="annotation-badge-field" class="field">编号内容<input id="annotation-badgeText" maxlength="4" aria-label="编号内容"></label>
+            </details>
+          </div>
+          <div id="annotation-text-options" hidden><label class="check-field"><input id="annotation-showLabel" type="checkbox">附带说明文字</label><div id="annotation-label-settings">
+            <label class="field">文字位置<select id="annotation-labelPosition"><option value="above">线段上方</option><option value="below">线段下方</option><option value="end">线段末端</option><option value="inline">线段中间</option></select></label>
+            <div class="field-row"><label class="field">文字区宽度<input id="annotation-labelWidth" type="number" step="1"></label><label class="field">与线段间距<input id="annotation-labelGap" type="number" step="1"></label></div>
+            <label class="check-field"><input id="annotation-labelBackground" type="checkbox">文字衬底</label>
+          </div><label id="annotation-label-color-field" class="field">衬底 / 编号颜色<input id="annotation-labelColor" type="color"></label></div>
+          <div id="text-fields"><label class="field">文字内容<textarea id="element-text" maxlength="10000" rows="3"></textarea></label><div class="field-row"><label class="field">字号<input id="font-size" type="number" min="1" max="1000" step="1"></label><label class="field">对齐<select id="text-align"><option value="left">左对齐</option><option value="center">居中</option><option value="right">右对齐</option></select></label><button id="text-bold" class="square-button" title="粗体">B</button></div></div>
+          <div class="field-row"><label class="field"><span id="fill-title">颜色</span><input type="color" id="element-fill"></label><label class="field" id="stroke-field"><span id="stroke-title">描边</span><input type="color" id="element-stroke"></label><label class="field">透明度<input id="element-opacity" type="number" min="0" max="100" step="5"></label></div>
+          <div class="field-row"><label class="field">旋转 °<input id="element-rotation" type="number" min="-360" max="360"></label><label class="field" id="stroke-width-field">线宽<input id="element-stroke-width" type="number" min="0" max="100" step="1"></label></div>
+          <div class="element-actions"><button id="align-center">水平居中</button><button id="duplicate-element">复制元素</button><button id="delete-element" class="danger-text">删除</button></div>
+          <div class="element-sharing"><button id="share-element" class="secondary full-width"><svg><use href="#i-link"/></svg>仅共享此元素到勾选页</button><button id="detach-element" class="text-button">让此元素在当前页独立</button></div>
+          <p class="tiny-note">共享元素的文字、样式、位置和删除会同步。其他独立排版不受影响。</p>
+          <p class="tiny-note">字号和线宽以画布宽度 1000 为基准。跨尺寸共享时按比例缩放。</p>
+        </section>
+        <section class="property-section layers-section"><div class="section-heading"><strong>图层</strong><span>上方显示在前</span></div><div id="layer-list" class="layer-list"></div><div class="layer-controls"><button id="layer-up">上移一层</button><button id="layer-down">下移一层</button><button id="layer-lock">锁定 / 解锁</button></div></section>
+      </div>
+      <div id="image-inspector" hidden>
+        <section class="property-section"><div class="section-heading"><strong>图片调色</strong><button id="reset-adjustments" class="text-button">还原调色</button></div><p class="tiny-note">原图始终保留。以下调整仅影响当前图片。</p>
+          <div class="filter-presets"><button data-filter="natural">原色</button><button data-filter="warm">暖调</button><button data-filter="clear">通透</button><button data-filter="mono">黑白</button></div><div id="adjustment-controls"></div>
+          <button id="copy-adjustments" class="secondary full-width">把调色复制到勾选页面</button>
+        </section>
+        <section class="property-section"><div class="section-heading"><strong>裁剪与旋转</strong><button id="rotate-image" class="text-button">顺时针 90°</button></div><label class="field">画面比例<select id="crop-ratio"><option value="0">原图比例</option><option value="1">1 : 1 正方形</option><option value="1.3333333333333333">4 : 3 横向</option><option value="1.5">3 : 2 横向</option><option value="1.7777777777777777">16 : 9 宽屏</option><option value="0.75">3 : 4 竖向</option><option value="0.5625">9 : 16 竖屏</option></select></label><label class="slider-field">左右取景<input id="crop-x" type="range" min="0" max="100" value="50"></label><label class="slider-field">上下取景<input id="crop-y" type="range" min="0" max="100" value="50"></label></section>
+      </div>
+    </div>
+    <div class="inspector-bottom"><span>✧</span> 把精力留给创作，修改都可以撤销</div>
+  </aside>
+</div>
+<input id="image-input" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" multiple hidden><input id="overlay-input" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+<div id="toast" class="toast" role="status" hidden></div>
+<dialog id="export-dialog"><form method="dialog"><button class="dialog-close" aria-label="关闭导出窗口">×</button></form><div class="dialog-heading"><span class="eyebrow">READY TO SHARE</span><h2>把你的作品，带到下一站</h2><p>画布里的排版和图片效果，会一起保存。</p></div><div class="export-body"><div class="export-preview"><img id="export-preview-image" alt="当前页面的导出效果预览"><span>当前页面预览</span></div><div class="export-settings"><label class="field">导出页面<select id="export-scope"><option value="all">全部页面</option><option value="selected">仅勾选页面</option></select></label><label class="field">清晰度<select id="export-width"><option value="1600">标准 · 最长边 1600 px</option><option value="2400">高清 · 最长边 2400 px</option><option value="3600">超清 · 最长边 3600 px</option><option value="0">原始尺寸 · 最高 2400 万像素</option></select></label><label class="field">透明区域底色<input id="export-background" type="color" value="#ffffff"></label><label class="check-field"><input id="export-cover" type="checkbox"> 添加文字封面</label><textarea id="export-title" placeholder="输入作品集标题" maxlength="1000" rows="2"></textarea><label class="check-field"><input id="export-separator" type="checkbox"> 图片之间添加留白页</label><p class="tiny-note">PDF 保持图片比例。文字和图形以高清画面输出，继续编辑请保存 .tare 作品。</p></div></div><div id="export-progress" class="export-progress" role="status"></div><div class="dialog-footer"><button id="export-png" class="secondary">当前页导出 PNG</button><button id="export-pdf" class="primary"><svg><use href="#i-download"/></svg>导出 PDF</button></div></dialog>
+<dialog id="help-dialog"><form method="dialog"><button class="dialog-close" aria-label="关闭帮助">×</button></form><span class="eyebrow">A LITTLE GUIDE</span><h2>从一张图，到一组作品</h2><ol class="help-steps"><li><b>导入图片</b><p>左侧添加图片，也可以把文件直接拖进窗口。点击页面切换，勾选框用于批量操作。</p></li><li><b>完成你的排版</b><p>添加文字、图形，或从“排版”选一个起点。“标注”提供直线、折线、箭头和编号模板，可点选或拖入；右侧分别调角度、段长和文字位置。双击文字编辑，角点缩放整组标注。</p></li><li><b>让几张图一起更新</b><p>勾选需要的页面，点击“共用当前排版”。此后编辑任何一个共享元素，绑定的页面都会同步。解除共享后可单独编辑。</p></li><li><b>保存，再分享</b><p>“保存作品”保留全部可编辑内容；“导出作品”生成 PDF 或当前页 PNG。关闭后也可恢复最近的自动保存。</p></li></ol><div class="shortcut-grid"><span>撤销 / 重做</span><kbd>Ctrl Z / Ctrl Shift Z</kbd><span>保存作品 / 另存为</span><kbd>Ctrl S / Ctrl Shift S</kbd><span>复制元素</span><kbd>Ctrl D</kbd><span>删除选中元素</span><kbd>Delete</kbd><span>微调位置 / 加速</span><kbd>方向键 / Shift 方向键</kbd><span>完成画布文字编辑</span><kbd>Ctrl Enter</kbd></div><p class="tiny-note">Mac 使用 ⌘ 替代 Ctrl。输入文字时，删除键只编辑文字。</p></dialog>
+</body></html>

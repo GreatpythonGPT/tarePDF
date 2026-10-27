@@ -1,13 +1,16 @@
 {
   "name": "tare-pdf-generator",
-  "version": "1.0.0",
-  "description": "渲染图演示 PDF 生成器 - 专为设计师打造的图片批量处理和PDF生成工具",
+  "version": "2.1.0",
+  "description": "Tare Studio · 图片编排、共享排版与 PDF 导出",
   "main": "src/main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron . --dev",
-    "build": "electron-builder",
-    "dist": "electron-builder --publish=never"
+    "start": "npm run compile && electron .",
+    "dev": "npm run compile && electron . --dev",
+    "compile": "node scripts/build.cjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:e2e": "npm run compile && node tests/editor.e2e.cjs && node tests/annotations.e2e.cjs",
+    "build": "npm run compile && electron-builder",
+    "dist": "npm run compile && electron-builder --publish=never"
   },
   "keywords": [
     "electron",
@@ -16,57 +19,57 @@
     "generator",
     "design"
   ],
-  "author": "Your Name",
+  "author": "GreatpythonGPT",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.1",
-    "electron-packager": "^17.1.2"
+    "electron": "45.0.0",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.28.2",
+    "playwright": "1.61.1"
   },
   "dependencies": {
-    "electron-store": "^8.1.0",
-    "pdf-lib": "^1.17.1",
-    "sharp": "^0.33.1"
+    "konva": "10.9.0",
+    "pdf-lib": "1.17.1"
   },
   "build": {
     "appId": "com.tarepdf.generator",
-    "productName": "Tare PDF Generator",
-    "forceCodeSigning": false,
-    "afterSign": false,
-    "afterAllArtifactBuild": false,
+    "productName": "Tare Studio",
     "directories": {
       "output": "dist"
     },
     "files": [
-      "src/**/*",
-      "fonts/**/*",
+      "src/main.js",
+      "src/preload.js",
+      "src/desktop.cjs",
+      "app/**/*",
       "assets/**/*",
-      "node_modules/**/*",
       "package.json"
     ],
-    "extraResources": [
-      {
-        "from": "fonts",
-        "to": "fonts"
-      }
-    ],
+    "asar": true,
     "win": {
-      "target": {
-        "target": "portable",
-        "arch": [
-          "x64"
-        ]
-      },
-      "publisherName": "Tare PDF Generator",
-      "requestedExecutionLevel": "asInvoker",
-      "sign": false
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false,
+      "icon": "assets/icon.ico"
     },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Tare PDF Generator"
+    "linux": {
+      "target": [
+        "dir"
+      ],
+      "category": "Graphics",
+      "icon": "assets/icon.png"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.graphics-design"
     }
   }
 }
