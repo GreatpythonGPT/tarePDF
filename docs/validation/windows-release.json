@@ -1,0 +1,23 @@
+{
+  "version": "2.1.0",
+  "tag": "v2.1.0",
+  "sourceCommit": "48b192d8259e71f533c9dcc1edd61f4406a93969",
+  "workflowRun": "https://github.com/GreatpythonGPT/tarePDF/actions/runs/40471649755",
+  "workflowConclusion": "success",
+  "buildAndTestEnvironment": "windows-latest",
+  "requiredSteps": [
+    "npm test",
+    "npm run dist -- --win portable --x64",
+    "node tests/editor.e2e.cjs (packaged Windows executable)",
+    "node tests/annotations.e2e.cjs (packaged Windows executable)",
+    "Prepare release only after both test reports pass",
+    "Download published attachments and verify SHA-256"
+  ],
+  "releaseUrl": "https://github.com/GreatpythonGPT/tarePDF/releases/tag/v2.1.0",
+  "publicDownload": {
+    "url": "https://github.com/GreatpythonGPT/tarePDF/releases/download/v2.1.0/Tare-Studio-2.1.0-Windows-x64.exe",
+    "bytes": 110898024,
+    "sha256": "1483766bfba7c435e1484acdf4ae1d496a4c3b55f95ce8d7dec91982281c99fe",
+    "downloadedAndVerified": true
+  }
+}

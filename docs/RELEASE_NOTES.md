@@ -19,10 +19,12 @@
 - 24 项单元测试通过，包含角度与段长独立、四向镜像、文字定位、缩放边界、非法参数、共享与撤销、旧作品兼容和原有调色算法。
 - 22 组真实 Electron 交互检查在源码及打包后 Linux 程序上通过；新增 7 组覆盖六种模板、参数面板、原生拖放、缩放平移后的落点、整体缩放、双击改字、跨页同步与独立、保存重开、小窗口、PDF / PNG。无渲染脚本错误。
 - 实际导出的三页标注 PDF 尺寸正确；将第一页按 1600 × 1100 渲染，与实际 PNG 逐像素比较，三个通道平均绝对差均低于 1.2 / 255。
-- Windows x64 便携版已交叉构建；此云环境为 Linux，未在真实 Windows 桌面执行。Windows 包未签名。
+- 2026-10-27 已发布 [v2.1.0 Windows 发行版](https://github.com/GreatpythonGPT/tarePDF/releases/tag/v2.1.0)：GitHub Actions 在 Windows 环境构建便携版，并运行打包程序的两套完整交互检查；全部通过后上传应用、示例和校验值。公开 `.exe` 下载已实际完成并校验一致。Windows 包未签名。
 - 验证结果位于 `docs/validation/`，新截图为 `docs/screenshots/annotations.png`。
 
 ### 2.1 成品
+
+普通用户从 [Releases 下载页](https://github.com/GreatpythonGPT/tarePDF/releases/latest) 下载 `Tare-Studio-2.1.0-Windows-x64.exe`。下面的 `dist/` 路径是云工作区此前生成的本地构建产物。
 
 - `dist/Tare Studio 2.1.0.exe`：Windows x64 便携版。
 - `dist/examples/产品标注示例.tare`：可继续编辑的三页示例。
