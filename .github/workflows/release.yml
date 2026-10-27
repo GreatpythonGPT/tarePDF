@@ -1,0 +1,117 @@
+name: Publish Windows application
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing version tag, for example v2.1.0'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and test Windows application
+    runs-on: windows-latest
+    timeout-minutes: 30
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      TARE_TEST_OUTPUT: ${{ github.workspace }}/test-results/windows-packaged
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Check version tag
+        id: version
+        run: node scripts/release.cjs check
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run unit tests
+        run: npm test
+      - name: Build portable application
+        run: npm run dist -- --win portable --x64
+      - name: Test packaged editor on Windows
+        env:
+          TAREPDF_EXECUTABLE: ${{ github.workspace }}/dist/win-unpacked/Tare Studio.exe
+        run: node tests/editor.e2e.cjs
+      - name: Test packaged annotations on Windows
+        env:
+          TAREPDF_EXECUTABLE: ${{ github.workspace }}/dist/win-unpacked/Tare Studio.exe
+        run: node tests/annotations.e2e.cjs
+      - name: Prepare application, examples and checksums
+        run: node scripts/release.cjs prepare
+      - name: Preserve test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-test-results-${{ github.run_id }}
+          path: |
+            test-results/**/results.json
+            test-results/**/*.png
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Hand verified files to publishing job
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-files
+          path: dist/release/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish downloadable application
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ needs.build.outputs.tag }}
+      RELEASE_VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-files
+          path: release
+      - name: Verify transferred files
+        working-directory: release
+        run: sha256sum --check SHA256SUMS.txt
+      - name: Create draft and upload complete assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "$RELEASE_TAG" --verify-tag --draft \
+            --title "Tare Studio $RELEASE_VERSION" --notes-file release/release-notes.md
+          gh release upload "$RELEASE_TAG" release/*.exe release/*.tare release/*.pdf \
+            release/README-Windows.txt release/SHA256SUMS.txt
+      - name: Publish release
+        run: gh release edit "$RELEASE_TAG" --draft=false --latest
+      - name: Verify downloadable assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release download "$RELEASE_TAG" --dir downloaded \
+            --pattern '*.exe' --pattern '*.tare' --pattern '*.pdf' \
+            --pattern 'README-Windows.txt' --pattern 'SHA256SUMS.txt'
+          cd downloaded
+          sha256sum --check SHA256SUMS.txt
+          gh release view "$RELEASE_TAG" --json url,isDraft,assets \
+            --jq '{url,isDraft,assets:[.assets[]|{name,size}]}'

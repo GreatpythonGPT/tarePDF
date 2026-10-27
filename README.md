@@ -6,7 +6,11 @@
 
 ## 使用
 
-Windows 用户打开发布包中的 `Tare Studio 2.1.0.exe`，无需安装 Node.js。第一次打开可点“体验示例作品”熟悉操作。
+**[下载 Windows 应用（Releases 发行版）](https://github.com/GreatpythonGPT/tarePDF/releases/latest)**
+
+在发行版下方展开 **Assets**，下载 `Tare-Studio-2.1.0-Windows-x64.exe`，双击运行，无需安装 Node.js。“Source code”以及仓库的“Download ZIP”是源码包，供开发使用。
+
+想先试用标注，点“标注 → 体验产品标注示例”；也可以打开附带的 `.tare` 示例。第一次打开还可点“体验示例作品”熟悉图片编排。
 
 1. **导入图片**：支持多文件选择、拖入窗口、粘贴图片；支持 JPG、PNG、WebP、BMP。粘贴到已有页面时作为贴图添加。
 2. **编辑**：画布上拖动、缩放、旋转；双击文字输入。右侧可设置字体大小、颜色、透明度、描边、对齐和图层顺序。长文字自动换行并增加文本框高度。
