@@ -1,0 +1,83 @@
+{
+  "version": "2.2.1",
+  "tag": "v2.2.1",
+  "sourceCommit": "385e4f504dabe61421157edca7c457959b12761c",
+  "workflowRun": "https://github.com/GreatpythonGPT/tarePDF/actions/runs/40520575994",
+  "workflowConclusion": "success",
+  "buildAndTestEnvironment": "windows-latest",
+  "requiredSteps": [
+    "npm test (33 unit tests)",
+    "npm run dist -- --win portable --x64",
+    "node tests/editor.e2e.cjs (15 packaged Windows interaction checks)",
+    "node tests/annotations.e2e.cjs (7 packaged Windows interaction checks)",
+    "node tests/collection.e2e.cjs (8 packaged Windows interaction checks)",
+    "Prepare release only after all three test reports pass",
+    "Download published attachments and verify SHA-256"
+  ],
+  "releaseUrl": "https://github.com/GreatpythonGPT/tarePDF/releases/tag/v2.2.1",
+  "latestReleaseRedirectVerified": true,
+  "publicDownload": {
+    "name": "Tare-Studio-2.2.1-Windows-x64.exe",
+    "url": "https://github.com/GreatpythonGPT/tarePDF/releases/download/v2.2.1/Tare-Studio-2.2.1-Windows-x64.exe",
+    "bytes": 110900316,
+    "sha256": "d67ca5477eb55f18761a690b976cd104d296bd17540e42b2d5a3886a33aefdc9",
+    "downloadedAndVerified": true
+  },
+  "verifiedAssets": [
+    {
+      "name": "Tare-Studio-2.2.1-Windows-x64.exe",
+      "url": "https://github.com/GreatpythonGPT/tarePDF/releases/download/v2.2.1/Tare-Studio-2.2.1-Windows-x64.exe",
+      "bytes": 110900316,
+      "sha256": "d67ca5477eb55f18761a690b976cd104d296bd17540e42b2d5a3886a33aefdc9",
+      "downloadedAndVerified": true
+    },
+    {
+      "name": "Tare-Studio-2.2.1-sample.tare",
+      "url": "https://github.com/GreatpythonGPT/tarePDF/releases/download/v2.2.1/Tare-Studio-2.2.1-sample.tare",
+      "bytes": 1928658,
+      "sha256": "3940ce7bae2af4cd233d0fa038ce1bdf633125248b92779e57afdc37f368ba6f",
+      "downloadedAndVerified": true
+    },
+    {
+      "name": "Tare-Studio-2.2.1-preview.pdf",
+      "url": "https://github.com/GreatpythonGPT/tarePDF/releases/download/v2.2.1/Tare-Studio-2.2.1-preview.pdf",
+      "bytes": 658792,
+      "sha256": "cae9b3e47b5ba2c6df45b6ce7d581ccea47f976da9e3408ab67d24eaf4afbfb9",
+      "downloadedAndVerified": true
+    },
+    {
+      "name": "Tare-Studio-2.2.1-collection.tare",
+      "url": "https://github.com/GreatpythonGPT/tarePDF/releases/download/v2.2.1/Tare-Studio-2.2.1-collection.tare",
+      "bytes": 1605708,
+      "sha256": "4d94fce66cac9f242a4159e38d4d73f42c33dd77a56df0bea55e85a4ebce0385",
+      "downloadedAndVerified": true
+    },
+    {
+      "name": "Tare-Studio-2.2.1-collection-preview.pdf",
+      "url": "https://github.com/GreatpythonGPT/tarePDF/releases/download/v2.2.1/Tare-Studio-2.2.1-collection-preview.pdf",
+      "bytes": 669507,
+      "sha256": "b9d4738ccd1b2aca3223f253a7b33805faa87399bd9daee24d6bdeccf67a6410",
+      "downloadedAndVerified": true
+    },
+    {
+      "name": "README-Windows.txt",
+      "url": "https://github.com/GreatpythonGPT/tarePDF/releases/download/v2.2.1/README-Windows.txt",
+      "bytes": 1267,
+      "sha256": "dbbf4ccdab479a062a50f4a544ca8156b7d0d3605f5c55512c1e1ddfc1c652a2",
+      "downloadedAndVerified": true
+    }
+  ],
+  "downloadedCollectionExample": {
+    "projectPages": 4,
+    "pdfPages": 8,
+    "imageWidths": [
+      1375,
+      1375,
+      1375,
+      1375,
+      1375
+    ],
+    "titleHeight": 180,
+    "separatorHeight": 48
+  }
+}

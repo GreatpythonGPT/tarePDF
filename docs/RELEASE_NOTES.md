@@ -17,6 +17,7 @@
 - 打包后的 Linux 程序通过单图编辑 15 组、模板标注 7 组、整组编排 8 组真实窗口交互检查，无渲染脚本错误。整组检查包含混合尺寸导入、连续与缩略图拖动、双击进入编辑、保存重开、旧作品迁移和小窗口操作。
 - 实际导出的八页 PDF 顺序、标题和横条高度均正确；四张不同尺寸图片及标题内嵌像素宽度均为指定的 1375 px，当前图 PNG 也遵守该宽度。仅导出一张勾选图片时，没有多余分隔横条。
 - 源码与打包检查结果保存在 `docs/validation/collection-*.json`，界面截图位于 `docs/screenshots/collection*.png`。
+- 2026-10-27 已发布 [v2.2.1 Windows 发行版](https://github.com/GreatpythonGPT/tarePDF/releases/tag/v2.2.1)。Windows 构建、33 项单元测试及三套共 30 组交互检查全部通过；公开应用和示例附件均已实际下载并校验 SHA-256，最新发行版入口已指向 2.2.1。记录见 `docs/validation/windows-release-2.2.json`。
 
 ### 2.2 成品
 
