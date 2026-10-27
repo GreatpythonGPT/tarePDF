@@ -39,7 +39,7 @@ TARE_E2E_NO_SANDBOX=1 xvfb-run -a -s '-screen 0 1600x1050x24' npm run test:e2e
 
 ## 发布可直接下载的应用
 
-`.github/workflows/release.yml` 在推送 `v2.2.0` 这类版本标签时运行，也可从 Actions 手动指定已有标签。标签必须匹配 `package.json` 的版本。
+`.github/workflows/release.yml` 在推送 `v2.2.1` 这类版本标签时运行，也可从 Actions 手动指定已有标签。标签必须匹配 `package.json` 的版本。
 
 推送 `main` 时也会构建 Windows 应用并执行三套交互检查；分支检查不发布附件。整组检查失败时，具体错误同时写入工作流注解与测试结果，便于定位平台差异。
 

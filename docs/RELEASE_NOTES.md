@@ -20,7 +20,7 @@
 
 ### 2.2 成品
 
-从 [Releases 下载页](https://github.com/GreatpythonGPT/tarePDF/releases/latest) 下载 `Tare-Studio-2.2.0-Windows-x64.exe`。附带 `collection.tare` 批量编排示例及对应 PDF，同时保留产品标注示例。Windows 便携版未进行代码签名。
+从 [Releases 下载页](https://github.com/GreatpythonGPT/tarePDF/releases/latest) 下载 `Tare-Studio-2.2.1-Windows-x64.exe`。附带 `collection.tare` 批量编排示例及对应 PDF，同时保留产品标注示例。Windows 便携版未进行代码签名。
 
 ## 2.1 · 模板标注工具箱
 

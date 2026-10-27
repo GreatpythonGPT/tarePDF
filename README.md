@@ -8,7 +8,7 @@
 
 **[下载 Windows 应用（Releases 发行版）](https://github.com/GreatpythonGPT/tarePDF/releases/latest)**
 
-在发行版下方展开 **Assets**，下载 `Tare-Studio-2.2.0-Windows-x64.exe`，双击运行，无需安装 Node.js。“Source code”以及仓库的“Download ZIP”是源码包，供开发使用。
+在发行版下方展开 **Assets**，下载 `Tare-Studio-2.2.1-Windows-x64.exe`，双击运行，无需安装 Node.js。“Source code”以及仓库的“Download ZIP”是源码包，供开发使用。
 
 直接导入一批图片即可进入“整组编排”。发行版附带批量编排和产品标注两份 `.tare` 示例及对应的 PDF。想先试用标注，点“标注 → 体验产品标注示例”。
 

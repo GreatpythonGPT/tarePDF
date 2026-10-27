@@ -1,6 +1,6 @@
 {
   "name": "tare-pdf-generator",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Tare Studio · 图片编排、共享排版与 PDF 导出",
   "main": "src/main.js",
   "scripts": {
